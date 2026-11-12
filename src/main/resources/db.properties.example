@@ -1,0 +1,8 @@
+# Copy this file to db.properties and fill in your local MySQL password.
+# Or configure the same values as JVM properties/environment variables:
+# bt.lt.db.url / BT_LT_DB_URL
+# bt.lt.db.user / BT_LT_DB_USER
+# bt.lt.db.password / BT_LT_DB_PASSWORD
+db.url=jdbc:mysql://127.0.0.1:3306/bt_lt_web?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&connectTimeout=3000&socketTimeout=5000
+db.user=root
+db.password=

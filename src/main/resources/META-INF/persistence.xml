@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+             version="3.2">
+    <persistence-unit name="jpa-hibernate-mysql" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>lt_web.entity.Category</class>
+        <class>lt_web.entity.User</class>
+        <class>lt_web.entity.RememberToken</class>
+        <validation-mode>NONE</validation-mode>
+
+        <!-- Mật khẩu thật được JpaConfig đọc từ db.properties hoặc biến môi trường. -->
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:mysql://127.0.0.1:3306/bt_lt_web?useSSL=false&amp;serverTimezone=Asia/Ho_Chi_Minh&amp;allowPublicKeyRetrieval=true&amp;characterEncoding=UTF-8" />
+            <property name="jakarta.persistence.jdbc.user" value="root" />
+            <property name="jakarta.persistence.jdbc.password" value="" />
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+        </properties>
+    </persistence-unit>
+</persistence>

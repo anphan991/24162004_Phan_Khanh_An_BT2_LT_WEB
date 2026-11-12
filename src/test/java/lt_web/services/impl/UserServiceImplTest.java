@@ -1,0 +1,127 @@
+package lt_web.services.impl;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import lt_web.entity.User;
+import lt_web.repository.IUserRepository;
+import lt_web.utils.PasswordHasher;
+import org.junit.jupiter.api.Test;
+
+class UserServiceImplTest {
+    @Test
+    void registerHashesPasswordAndLoginValidatesIt() {
+        InMemoryUserRepository repo = new InMemoryUserRepository();
+        UserServiceImpl service = new UserServiceImpl(repo);
+
+        assertTrue(service.register("member", "secret", "member@example.com", "Member", "0900000000"));
+        assertTrue(PasswordHasher.isHash(repo.user.getPassWord()));
+        assertNotNull(service.login("member", "secret"));
+        assertNull(service.login("member", "wrong"));
+    }
+
+    @Test
+    void duplicateUsernameIsRejected() {
+        InMemoryUserRepository repo = new InMemoryUserRepository();
+        UserServiceImpl service = new UserServiceImpl(repo);
+
+        assertTrue(service.register("member", "secret", null, "Member", null));
+        assertFalse(service.register("member", "another", null, "Member 2", null));
+    }
+
+    private static final class InMemoryUserRepository implements IUserRepository {
+        private User user;
+
+        @Override
+        public List<User> findAll() {
+            return user == null ? List.of() : new ArrayList<>(List.of(user));
+        }
+
+        @Override
+        public User findById(int id) {
+            return user != null && user.getId() == id ? user : null;
+        }
+
+        @Override
+        public User findByUsername(String username) {
+            return user != null && user.getUserName().equals(username) ? user : null;
+        }
+
+        @Override
+        public User get(String username) {
+            return findByUsername(username);
+        }
+
+        @Override
+        public User getById(int id) {
+            return findById(id);
+        }
+
+        @Override
+        public void insert(User value) {
+            value.setId(1);
+            user = value;
+        }
+
+        @Override
+        public void update(User value) {
+            user = value;
+        }
+
+        @Override
+        public void updatePassword(String username, String passwordHash) {
+            if (user != null && user.getUserName().equals(username)) {
+                user.setPassWord(passwordHash);
+            }
+        }
+
+        @Override
+        public int migratePlaintextPasswords() {
+            return 0;
+        }
+
+        @Override
+        public void delete(int id) {
+            user = null;
+        }
+
+        @Override
+        public boolean checkExistEmail(String email) {
+            return checkExistEmail(email, 0);
+        }
+
+        @Override
+        public boolean checkExistEmail(String email, int excludedId) {
+            return user != null && email != null && email.equals(user.getEmail()) && user.getId() != excludedId;
+        }
+
+        @Override
+        public boolean checkExistUsername(String username) {
+            return checkExistUsername(username, 0);
+        }
+
+        @Override
+        public boolean checkExistUsername(String username, int excludedId) {
+            return user != null && username != null && username.equals(user.getUserName()) && user.getId() != excludedId;
+        }
+
+        @Override
+        public boolean checkExistPhone(String phone) {
+            return checkExistPhone(phone, 0);
+        }
+
+        @Override
+        public boolean checkExistPhone(String phone, int excludedId) {
+            return user != null && phone != null && phone.equals(user.getPhone()) && user.getId() != excludedId;
+        }
+
+        @Override
+        public List<User> getAll() {
+            return findAll();
+        }
+    }
+}
