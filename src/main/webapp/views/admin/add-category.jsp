@@ -35,7 +35,7 @@
                         <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
                         <div class="admin-field">
                             <label for="catename">Tên danh mục</label>
-                            <input id="catename" type="text" name="catename" placeholder="Ví dụ: Phụ kiện thời trang" required>
+                            <input id="catename" type="text" name="catename" value="<c:out value='${catename}' />" placeholder="Ví dụ: Phụ kiện thời trang" required>
                         </div>
 
                         <div class="admin-field">

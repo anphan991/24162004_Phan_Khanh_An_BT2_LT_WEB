@@ -100,7 +100,7 @@ public class CategoryRepository implements ICategoryRepository {
         try {
             String jpql = "SELECT c FROM Category c WHERE c.catename LIKE :catname ORDER BY c.cateid ASC";
             TypedQuery<Category> query = enma.createQuery(jpql, Category.class);
-            query.setParameter("catname", "%" + (catname == null ? "" : catname.trim()) + "%");
+            query.setParameter("catname", likePattern(catname));
             return query.getResultList();
         } catch (Exception e) {
             throw new DataAccessException("Không thể tìm danh mục từ MySQL qua JPA.", e);
@@ -110,12 +110,33 @@ public class CategoryRepository implements ICategoryRepository {
     }
 
     @Override
+    public List<Category> findByCategoryname(String catname, int page, int pagesize) {
+        int safePage = Math.max(0, page);
+        int safePageSize = Math.max(1, pagesize);
+        EntityManager enma = JpaConfig.getEntityManager();
+        try {
+            String jpql = "SELECT c FROM Category c WHERE c.catename LIKE :catname ORDER BY c.cateid ASC";
+            TypedQuery<Category> query = enma.createQuery(jpql, Category.class);
+            query.setParameter("catname", likePattern(catname));
+            query.setFirstResult(safePage * safePageSize);
+            query.setMaxResults(safePageSize);
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new DataAccessException("Không thể tìm kiếm và phân trang danh mục.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
     public List<Category> findAll(int page, int pagesize) {
+        int safePage = Math.max(0, page);
+        int safePageSize = Math.max(1, pagesize);
         EntityManager enma = JpaConfig.getEntityManager();
         try {
             TypedQuery<Category> query = enma.createNamedQuery("Category.findAll", Category.class);
-            query.setFirstResult(page * pagesize);
-            query.setMaxResults(pagesize);
+            query.setFirstResult(safePage * safePageSize);
+            query.setMaxResults(safePageSize);
             return query.getResultList();
         } catch (Exception e) {
             throw new DataAccessException("Không thể phân trang danh mục.", e);
@@ -133,6 +154,22 @@ public class CategoryRepository implements ICategoryRepository {
             return ((Long) query.getSingleResult()).intValue();
         } catch (Exception e) {
             throw new DataAccessException("Không thể đếm số lượng danh mục.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
+    public int countByCategoryname(String catname) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        try {
+            String jpql = "SELECT count(c) FROM Category c WHERE c.catename LIKE :catname";
+            TypedQuery<Long> query = enma.createQuery(jpql, Long.class);
+            query.setParameter("catname", likePattern(catname));
+            Long result = query.getSingleResult();
+            return result == null ? 0 : result.intValue();
+        } catch (Exception e) {
+            throw new DataAccessException("Không thể đếm số lượng danh mục theo từ khóa.", e);
         } finally {
             enma.close();
         }
@@ -180,6 +217,10 @@ public class CategoryRepository implements ICategoryRepository {
     @Override
     public List<Category> search(String keyword) {
         return findByCategoryname(keyword);
+    }
+
+    private String likePattern(String keyword) {
+        return "%" + (keyword == null ? "" : keyword.trim()) + "%";
     }
 
     public static void main(String[] args) {

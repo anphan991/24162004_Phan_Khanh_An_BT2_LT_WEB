@@ -25,7 +25,7 @@
             <div class="admin-stats">
                 <div class="admin-stat">
                     <div class="admin-stat-label">Danh mục</div>
-                    <div class="admin-stat-value">${cateList.size()}</div>
+                    <div class="admin-stat-value">${totalCategories}</div>
                 </div>
                 <div class="admin-stat">
                     <div class="admin-stat-label">Tài khoản</div>
@@ -64,6 +64,9 @@
             <c:if test="${param.categoryError == 'delete'}">
                 <div class="admin-alert">Không thể xóa danh mục. Vui lòng thử lại.</div>
             </c:if>
+            <c:if test="${param.categoryError == 'load'}">
+                <div class="admin-alert">Không thể tải thông tin danh mục. Vui lòng thử lại.</div>
+            </c:if>
 
             <section class="admin-panel">
                 <div class="admin-panel-header">
@@ -94,7 +97,7 @@
                         <tbody>
                             <c:forEach items="${cateList}" var="cate" varStatus="status">
                                 <tr>
-                                    <td class="admin-id">${status.index + 1}</td>
+                                    <td class="admin-id">${pageOffset + status.index + 1}</td>
                                     <c:url value="/image" var="imgUrl">
                                         <c:param name="fname" value="${cate.icon}" />
                                     </c:url>
@@ -121,6 +124,41 @@
                         </tbody>
                     </table>
                 </div>
+
+                <c:if test="${totalPages > 1}">
+                    <nav class="admin-pagination" aria-label="Phân trang danh mục">
+                        <span class="admin-pagination-info">Trang ${currentPage} / ${totalPages} (${filteredCategories} danh mục)</span>
+                        <div class="admin-pagination-links">
+                            <c:if test="${currentPage > 1}">
+                                <c:url value="/admin/category/list" var="prevUrl">
+                                    <c:param name="page" value="${currentPage - 1}" />
+                                    <c:if test="${not empty keyword}">
+                                        <c:param name="keyword" value="${keyword}" />
+                                    </c:if>
+                                </c:url>
+                                <a class="admin-page-link" href="${prevUrl}">Trước</a>
+                            </c:if>
+                            <c:forEach begin="1" end="${totalPages}" var="p">
+                                <c:url value="/admin/category/list" var="pageUrl">
+                                    <c:param name="page" value="${p}" />
+                                    <c:if test="${not empty keyword}">
+                                        <c:param name="keyword" value="${keyword}" />
+                                    </c:if>
+                                </c:url>
+                                <a class="admin-page-link ${p == currentPage ? 'active' : ''}" href="${pageUrl}">${p}</a>
+                            </c:forEach>
+                            <c:if test="${currentPage < totalPages}">
+                                <c:url value="/admin/category/list" var="nextUrl">
+                                    <c:param name="page" value="${currentPage + 1}" />
+                                    <c:if test="${not empty keyword}">
+                                        <c:param name="keyword" value="${keyword}" />
+                                    </c:if>
+                                </c:url>
+                                <a class="admin-page-link" href="${nextUrl}">Sau</a>
+                            </c:if>
+                        </div>
+                    </nav>
+                </c:if>
             </section>
 
             <section class="admin-panel" id="users-section">

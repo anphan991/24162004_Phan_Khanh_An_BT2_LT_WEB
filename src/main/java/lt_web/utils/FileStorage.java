@@ -54,6 +54,17 @@ public final class FileStorage {
         }
     }
 
+    public static void deleteQuietly(String fileName) {
+        if (fileName == null || fileName.isBlank() || fileName.startsWith("default-")) {
+            return;
+        }
+        try {
+            delete(fileName);
+        } catch (IOException ignored) {
+            // Không làm gián đoạn luồng chính nếu file tạm không xóa được.
+        }
+    }
+
     private static String extensionOf(String fileName) {
         int dot = fileName.lastIndexOf('.');
         if (dot < 0 || dot == fileName.length() - 1) {

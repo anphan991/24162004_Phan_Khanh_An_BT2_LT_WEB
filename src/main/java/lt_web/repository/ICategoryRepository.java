@@ -10,8 +10,10 @@ public interface ICategoryRepository {
     void update(Category category);
     void delete(int id);
     List<Category> findByCategoryname(String catname);
+    List<Category> findByCategoryname(String catname, int page, int pagesize);
     List<Category> findAll(int page, int pagesize);
     int count();
+    int countByCategoryname(String catname);
 
     void insert(Category category);
     void edit(Category category);

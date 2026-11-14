@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import lt_web.entity.Category;
+import lt_web.exceptions.DataAccessException;
 import lt_web.services.CategoryService;
 import lt_web.services.impl.CategoryServiceImpl;
 import lt_web.utils.Constant;
@@ -42,34 +43,48 @@ public class CategoryAddController extends HttpServlet {
         Category category = new Category();
         String categoryname = req.getParameter("catename");
         category.setCateName(categoryname == null ? "" : categoryname.trim());
-        if (category.getName().isBlank()) {
-            req.setAttribute("alert", "Tên danh mục không được để trống.");
-            req.getRequestDispatcher(Constant.Path.ADMIN_ADD_CATEGORY).forward(req, resp);
+        String validationMessage = ValidationUtil.firstMessage(category);
+        if (validationMessage != null) {
+            showFormError(req, resp, category.getCatename(), validationMessage);
             return;
         }
 
+        String storedName = null;
         try {
             Part part = req.getPart("icon");
             if (part == null || part.getSize() == 0) {
                 part = req.getPart("images");
             }
-            String storedName = FileStorage.saveImage(part);
+            storedName = FileStorage.saveImage(part);
             category.setIcon(storedName == null ? "default-category.svg" : storedName);
         } catch (Exception e) {
             log("Không thể lưu ảnh danh mục", e);
-            req.setAttribute("alert", "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
-            req.getRequestDispatcher(Constant.Path.ADMIN_ADD_CATEGORY).forward(req, resp);
+            showFormError(req, resp, category.getCatename(),
+                    "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
             return;
         }
 
-        String validationMessage = ValidationUtil.firstMessage(category);
+        validationMessage = ValidationUtil.firstMessage(category);
         if (validationMessage != null) {
-            req.setAttribute("alert", validationMessage);
-            req.getRequestDispatcher(Constant.Path.ADMIN_ADD_CATEGORY).forward(req, resp);
+            FileStorage.deleteQuietly(storedName);
+            showFormError(req, resp, category.getCatename(), validationMessage);
             return;
         }
 
-        cateService.insert(category);
-        resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+        try {
+            cateService.insert(category);
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+        } catch (DataAccessException e) {
+            FileStorage.deleteQuietly(storedName);
+            log("Không thể thêm danh mục", e);
+            showFormError(req, resp, category.getCatename(), "Không thể lưu danh mục. Vui lòng thử lại.");
+        }
+    }
+
+    private void showFormError(HttpServletRequest req, HttpServletResponse resp, String catename, String alert)
+            throws ServletException, IOException {
+        req.setAttribute("catename", catename);
+        req.setAttribute("alert", alert);
+        req.getRequestDispatcher(Constant.Path.ADMIN_ADD_CATEGORY).forward(req, resp);
     }
 }

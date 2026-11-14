@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import lt_web.entity.Category;
+import lt_web.exceptions.DataAccessException;
 import lt_web.services.CategoryService;
 import lt_web.services.impl.CategoryServiceImpl;
 import lt_web.utils.Constant;
@@ -35,14 +36,19 @@ public class CategoryEditController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/admin/category/list");
             return;
         }
-        Category category = cateService.get(categoryId);
-        if (category == null) {
-            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
-            return;
+        try {
+            Category category = cateService.get(categoryId);
+            if (category == null) {
+                resp.sendRedirect(req.getContextPath() + "/admin/category/list?categoryError=missing");
+                return;
+            }
+            req.setAttribute("category", category);
+            RequestDispatcher dispatcher = req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY);
+            dispatcher.forward(req, resp);
+        } catch (DataAccessException e) {
+            log("Không thể tải danh mục cần sửa", e);
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list?categoryError=load");
         }
-        req.setAttribute("category", category);
-        RequestDispatcher dispatcher = req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY);
-        dispatcher.forward(req, resp);
     }
 
     @Override
@@ -65,41 +71,60 @@ public class CategoryEditController extends HttpServlet {
         category.setCateId(cateid);
         category.setCateName(catename == null ? "" : catename.trim());
 
-        Category cateold = cateService.get(cateid);
-        if (cateold == null) {
-            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
-            return;
-        }
-        if (category.getName().isBlank()) {
-            req.setAttribute("category", cateold);
-            req.setAttribute("alert", "Tên danh mục không được để trống.");
-            req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY).forward(req, resp);
-            return;
-        }
-        String fileold = cateold != null ? cateold.getIcon() : "default-category.svg";
-
+        Category cateold;
         try {
-            Part part = req.getPart("icon");
-            String storedName = FileStorage.saveImage(part);
-            category.setIcon(storedName == null ? fileold : storedName);
-        } catch (Exception e) {
-            log("Không thể lưu ảnh danh mục", e);
-            req.setAttribute("category", cateold);
-            req.setAttribute("alert", "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
-            req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY).forward(req, resp);
+            cateold = cateService.get(cateid);
+        } catch (DataAccessException e) {
+            log("Không thể tải danh mục cần cập nhật", e);
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list?categoryError=load");
+            return;
+        }
+        if (cateold == null) {
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list?categoryError=missing");
             return;
         }
 
         String validationMessage = ValidationUtil.firstMessage(category);
         if (validationMessage != null) {
-            req.setAttribute("category", cateold);
-            req.setAttribute("alert", validationMessage);
-            req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY).forward(req, resp);
+            showFormError(req, resp, cateold, validationMessage);
             return;
         }
 
-        cateService.edit(category);
-        resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+        String fileold = cateold.getIcon() != null ? cateold.getIcon() : "default-category.svg";
+        String storedName = null;
+        try {
+            Part part = req.getPart("icon");
+            storedName = FileStorage.saveImage(part);
+            category.setIcon(storedName == null ? fileold : storedName);
+        } catch (Exception e) {
+            log("Không thể lưu ảnh danh mục", e);
+            showFormError(req, resp, cateold,
+                    "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
+            return;
+        }
+
+        validationMessage = ValidationUtil.firstMessage(category);
+        if (validationMessage != null) {
+            FileStorage.deleteQuietly(storedName);
+            showFormError(req, resp, cateold, validationMessage);
+            return;
+        }
+
+        try {
+            cateService.edit(category);
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+        } catch (DataAccessException | IllegalStateException e) {
+            FileStorage.deleteQuietly(storedName);
+            log("Không thể cập nhật danh mục", e);
+            showFormError(req, resp, cateold, "Không thể cập nhật danh mục. Vui lòng thử lại.");
+        }
+    }
+
+    private void showFormError(HttpServletRequest req, HttpServletResponse resp, Category cateold, String alert)
+            throws ServletException, IOException {
+        req.setAttribute("category", cateold);
+        req.setAttribute("alert", alert);
+        req.getRequestDispatcher(Constant.Path.ADMIN_EDIT_CATEGORY).forward(req, resp);
     }
 
     private int parseId(String value) {

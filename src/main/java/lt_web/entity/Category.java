@@ -14,7 +14,7 @@ import jakarta.validation.constraints.Size;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Category")
-@NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c")
+@NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c ORDER BY c.cateid ASC")
 public class Category implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -30,25 +30,30 @@ public class CategoryServiceImpl implements CategoryService {
         if (oldCategory == null) {
             return;
         }
+        String previousIcon = oldCategory.getIcon();
         oldCategory.setName(newCategory.getName());
-        if (newCategory.getIcon() != null && !newCategory.getIcon().isBlank()) {
-            String fileName = oldCategory.getIcon();
-            if (fileName != null && !fileName.equals(newCategory.getIcon())
-                    && !fileName.startsWith("default-")) {
-                try {
-                    FileStorage.delete(fileName);
-                } catch (IOException e) {
-                    throw new IllegalStateException("Không thể xóa ảnh danh mục cũ.", e);
-                }
-            }
+        boolean replacingIcon = newCategory.getIcon() != null && !newCategory.getIcon().isBlank();
+        if (replacingIcon) {
             oldCategory.setIcon(newCategory.getIcon());
         }
         categoryRepo.edit(oldCategory);
+
+        if (replacingIcon && isCustomIcon(previousIcon) && !previousIcon.equals(newCategory.getIcon())) {
+            try {
+                FileStorage.delete(previousIcon);
+            } catch (IOException e) {
+                throw new IllegalStateException("Không thể xóa ảnh danh mục cũ.", e);
+            }
+        }
     }
 
     @Override
     public void delete(int id) {
+        Category existing = categoryRepo.get(id);
         categoryRepo.delete(id);
+        if (existing != null) {
+            FileStorage.deleteQuietly(existing.getIcon());
+        }
     }
 
     @Override
@@ -97,6 +102,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<Category> findByCategoryname(String catname, int page, int pagesize) {
+        return categoryRepo.findByCategoryname(catname, page, pagesize);
+    }
+
+    @Override
     public List<Category> findAll(int page, int pagesize) {
         return categoryRepo.findAll(page, pagesize);
     }
@@ -104,5 +114,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public int count() {
         return categoryRepo.count();
+    }
+
+    @Override
+    public int countByCategoryname(String catname) {
+        return categoryRepo.countByCategoryname(catname);
+    }
+
+    private boolean isCustomIcon(String fileName) {
+        return fileName != null && !fileName.isBlank() && !fileName.startsWith("default-");
     }
 }

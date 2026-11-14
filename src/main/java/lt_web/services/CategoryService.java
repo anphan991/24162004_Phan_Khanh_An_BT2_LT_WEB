@@ -17,6 +17,8 @@ public interface CategoryService {
     void create(Category category);
     void update(Category category);
     List<Category> findByCategoryname(String catname);
+    List<Category> findByCategoryname(String catname, int page, int pagesize);
     List<Category> findAll(int page, int pagesize);
     int count();
+    int countByCategoryname(String catname);
 }

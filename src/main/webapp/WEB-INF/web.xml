@@ -4,6 +4,10 @@
          metadata-complete="true">
     <display-name>BT2 - Shopping Servlet Service MVC</display-name>
 
+    <listener>
+        <listener-class>lt_web.controllers.AppContextListener</listener-class>
+    </listener>
+
     <filter>
         <filter-name>RememberMeFilter</filter-name>
         <filter-class>lt_web.controllers.RememberMeFilter</filter-class>
