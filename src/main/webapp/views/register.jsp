@@ -27,19 +27,19 @@
             <div class="form-grid">
                 <div class="field-group">
                     <label for="username">Tên đăng nhập</label>
-                    <input id="username" class="input-control" type="text" name="username" placeholder="Ví dụ: nguyenvana" required autocomplete="username">
+                    <input id="username" class="input-control" type="text" name="username" value="<c:out value='${username}' />" placeholder="Ví dụ: nguyenvana" required autocomplete="username">
                 </div>
                 <div class="field-group">
                     <label for="fullname">Họ và tên</label>
-                    <input id="fullname" class="input-control" type="text" name="fullname" placeholder="Nguyễn Văn A" required autocomplete="name">
+                    <input id="fullname" class="input-control" type="text" name="fullname" value="<c:out value='${fullname}' />" placeholder="Nguyễn Văn A" required autocomplete="name">
                 </div>
                 <div class="field-group">
-                    <label for="email">Email</label>
-                    <input id="email" class="input-control" type="email" name="email" placeholder="email@domain.com" required autocomplete="email">
+                    <label for="email">Email (nhận mã OTP)</label>
+                    <input id="email" class="input-control" type="email" name="email" value="<c:out value='${email}' />" placeholder="email@domain.com" required autocomplete="email">
                 </div>
                 <div class="field-group">
                     <label for="phone">Số điện thoại</label>
-                    <input id="phone" class="input-control" type="text" name="phone" placeholder="0901234567" required autocomplete="tel">
+                    <input id="phone" class="input-control" type="text" name="phone" value="<c:out value='${phone}' />" placeholder="0901234567" required autocomplete="tel">
                 </div>
                 <div class="field-group">
                     <label for="password">Mật khẩu</label>
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <p class="form-note">Tài khoản mới sẽ được cấp quyền thành viên và chỉ có thể xem danh mục.</p>
+            <p class="form-note">Sau khi bấm Tạo tài khoản, hệ thống sẽ gửi một mã OTP 6 chữ số tới email của bạn để kích hoạt tài khoản.</p>
 
             <button class="button button-primary auth-submit" type="submit">Tạo tài khoản</button>
         </form>

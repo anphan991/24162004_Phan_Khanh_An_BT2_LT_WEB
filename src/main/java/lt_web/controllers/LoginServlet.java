@@ -69,6 +69,12 @@ public class LoginServlet extends HttpServlet {
         UserService service = new UserServiceImpl();
         User user = service.login(username.trim(), password);
         if (user != null) {
+            if (user.getStatus() != null && user.getStatus() == 0) {
+                req.setAttribute("alert", "Tài khoản chưa được kích hoạt. Vui lòng kích hoạt qua mã OTP đã gửi tới email.");
+                req.setAttribute("unactivatedEmail", user.getEmail());
+                req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
+                return;
+            }
             establishSession(req, user);
             if (isRememberMe) {
                 saveRememberMe(req, resp, user);

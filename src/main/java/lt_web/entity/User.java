@@ -55,6 +55,9 @@ public class User implements Serializable {
     @Column(name = "createdDate")
     private Date createdDate;
 
+    @Column(name = "status")
+    private Integer status = 1;
+
     public User() {
     }
 
@@ -177,5 +180,17 @@ public class User implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Integer getStatus() {
+        return status == null ? 1 : status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public boolean isActive() {
+        return getStatus() == 1;
     }
 }

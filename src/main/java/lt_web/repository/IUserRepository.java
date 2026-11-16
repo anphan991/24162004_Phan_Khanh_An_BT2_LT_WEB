@@ -7,12 +7,15 @@ public interface IUserRepository {
     List<User> findAll();
     User findById(int id);
     User findByUsername(String username);
+    User findByEmail(String email);
 
     User get(String username);
     User getById(int id);
     void insert(User user);
     void update(User user);
+    void updateStatus(int userId, int status);
     void updatePassword(String username, String passwordHash);
+    void updatePasswordByEmail(String email, String passwordHash);
     int migratePlaintextPasswords();
     void delete(int id);
     boolean checkExistEmail(String email);

@@ -29,6 +29,12 @@ public class LogoutController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/login?signedOut=1");
     }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        doGet(req, resp);
+    }
+
     private String getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {

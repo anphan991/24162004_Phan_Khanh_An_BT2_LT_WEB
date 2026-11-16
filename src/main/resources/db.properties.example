@@ -6,3 +6,21 @@
 db.url=jdbc:mysql://127.0.0.1:3306/bt_lt_web?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&connectTimeout=3000&socketTimeout=5000
 db.user=root
 db.password=
+
+# Cấu hình gửi mail OTP qua SMTP (Gmail / Mailtrap / SMTP Server).
+# Có thể cấu hình tại đây hoặc qua biến môi trường / JVM properties:
+# mail.smtp.host / MAIL_HOST
+# mail.smtp.port / MAIL_PORT
+# mail.smtp.username / MAIL_USERNAME
+# mail.smtp.password / MAIL_PASSWORD (với Gmail: dùng App Password 16 ký tự)
+# mail.from.name / MAIL_FROM_NAME
+# Lưu ý: nếu để trống mật khẩu mail, hệ thống chạy ở chế độ fallback/dev:
+# mã OTP sẽ được ghi trực tiếp vào log/console để test offline.
+mail.smtp.host=smtp.gmail.com
+mail.smtp.port=587
+mail.smtp.username=
+mail.smtp.password=
+mail.smtp.auth=true
+mail.smtp.starttls.enable=true
+mail.from.name=ShopMVC
+

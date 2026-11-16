@@ -21,8 +21,25 @@
         <c:if test="${param.registered == '1'}">
             <div class="alert alert-success">Tạo tài khoản thành công. Vui lòng đăng nhập.</div>
         </c:if>
+        <c:if test="${param.activated == '1'}">
+            <div class="alert alert-success">Kích hoạt tài khoản thành công! Vui lòng đăng nhập.</div>
+        </c:if>
+        <c:if test="${param.resetSuccess == '1'}">
+            <div class="alert alert-success">Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.</div>
+        </c:if>
+        <c:if test="${param.signedOut == '1'}">
+            <div class="alert alert-success">Đã đăng xuất thành công khỏi hệ thống.</div>
+        </c:if>
         <c:if test="${param.requireAuth == '1'}">
             <div class="alert alert-warning">Vui lòng đăng nhập để truy cập trang này.</div>
+        </c:if>
+        <c:if test="${not empty unactivatedEmail}">
+            <div class="alert alert-warning">
+                Tài khoản chưa kích hoạt.
+                <a href="${pageContext.request.contextPath}/verify-otp?email=<c:out value='${unactivatedEmail}' />&type=activation" style="font-weight:700;text-decoration:underline;">
+                    Bấm vào đây để nhập mã OTP kích hoạt
+                </a>
+            </div>
         </c:if>
         <c:if test="${alert != null}">
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
@@ -40,10 +57,13 @@
                 <input id="password" class="input-control" type="password" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
             </div>
 
-            <label class="checkbox-row">
-                <input type="checkbox" name="remember" ${remembered ? 'checked' : ''}>
-                <span>Ghi nhớ đăng nhập</span>
-            </label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0 22px;">
+                <label class="checkbox-row" style="margin: 0;">
+                    <input type="checkbox" name="remember" ${remembered ? 'checked' : ''}>
+                    <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a href="${pageContext.request.contextPath}/forgot-password" style="font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+            </div>
 
             <button class="button button-primary auth-submit" type="submit">Đăng nhập</button>
         </form>

@@ -33,6 +33,23 @@ class UserServiceImplTest {
         assertFalse(service.register("member", "another", null, "Member 2", null));
     }
 
+    @Test
+    void activateUserAndResetPassword() {
+        InMemoryUserRepository repo = new InMemoryUserRepository();
+        UserServiceImpl service = new UserServiceImpl(repo);
+
+        service.register("user_otp", "oldpass", "user@test.com", "Test OTP", "0911222333");
+        assertNotNull(service.findByEmail("user@test.com"));
+        assertFalse(repo.user.isActive());
+
+        assertTrue(service.activateUser("user@test.com"));
+        assertTrue(repo.user.isActive());
+
+        assertTrue(service.resetPassword("user@test.com", "newpass123"));
+        assertTrue(PasswordHasher.matches("newpass123", repo.user.getPassWord()));
+        assertNotNull(service.login("user_otp", "newpass123"));
+    }
+
     private static final class InMemoryUserRepository implements IUserRepository {
         private User user;
 
@@ -49,6 +66,11 @@ class UserServiceImplTest {
         @Override
         public User findByUsername(String username) {
             return user != null && user.getUserName().equals(username) ? user : null;
+        }
+
+        @Override
+        public User findByEmail(String email) {
+            return user != null && email != null && email.equalsIgnoreCase(user.getEmail()) ? user : null;
         }
 
         @Override
@@ -73,8 +95,22 @@ class UserServiceImplTest {
         }
 
         @Override
+        public void updateStatus(int userId, int status) {
+            if (user != null && user.getId() == userId) {
+                user.setStatus(status);
+            }
+        }
+
+        @Override
         public void updatePassword(String username, String passwordHash) {
             if (user != null && user.getUserName().equals(username)) {
+                user.setPassWord(passwordHash);
+            }
+        }
+
+        @Override
+        public void updatePasswordByEmail(String email, String passwordHash) {
+            if (user != null && email != null && email.equalsIgnoreCase(user.getEmail())) {
                 user.setPassWord(passwordHash);
             }
         }

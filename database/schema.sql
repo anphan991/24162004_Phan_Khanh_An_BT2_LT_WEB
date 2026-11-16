@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     avatar VARCHAR(255) NULL,
     roleid INT NOT NULL DEFAULT 5,
     phone VARCHAR(20) NULL,
-    createdDate DATE NULL
+    createdDate DATE NULL,
+    status INT NOT NULL DEFAULT 1
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS Category (
@@ -31,4 +32,16 @@ CREATE TABLE IF NOT EXISTS remember_tokens (
         REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_remember_tokens_expiry (expires_at),
     INDEX idx_remember_tokens_user (user_id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS otp_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    otp_type VARCHAR(20) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    is_used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_otp_email_type (email, otp_type),
+    INDEX idx_otp_expiry (expires_at)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

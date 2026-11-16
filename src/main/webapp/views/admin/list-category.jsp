@@ -197,6 +197,14 @@
                                             <c:when test="${u.roleid == 2}"><span class="admin-role">Manager</span></c:when>
                                             <c:otherwise><span class="admin-role member">Member</span></c:otherwise>
                                         </c:choose>
+                                        <c:choose>
+                                            <c:when test="${u.status == 0}">
+                                                <span class="admin-role" style="background:#fff2e8;color:#d4380d;border:1px solid #ffbb96;margin-left:4px;">Chờ kích hoạt</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="admin-role" style="background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;margin-left:4px;">Đã kích hoạt</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                     <c:if test="${sessionScope.account.roleid == 1}">
                                         <td>

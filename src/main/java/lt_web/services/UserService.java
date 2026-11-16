@@ -7,7 +7,10 @@ public interface UserService {
     User login(String username, String password);
     User get(String username);
     User get(int id);
+    User findByEmail(String email);
     boolean register(String username, String password, String email, String fullname, String phone);
+    boolean activateUser(String email);
+    boolean resetPassword(String email, String rawPassword);
     boolean create(User user, String rawPassword);
     boolean update(User user, String rawPassword);
     void delete(int id);

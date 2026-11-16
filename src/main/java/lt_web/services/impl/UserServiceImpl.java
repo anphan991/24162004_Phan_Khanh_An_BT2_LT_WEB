@@ -49,12 +49,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByEmail(String email) {
+        return email == null || email.isBlank() ? null : userRepo.findByEmail(email.trim());
+    }
+
+    @Override
     public boolean register(String username, String password, String email, String fullname, String phone) {
         if (checkExistUsername(username)) {
             return false;
         }
         User user = new User(email, username, fullname, password, null, 5, phone, new Date(System.currentTimeMillis()));
+        user.setStatus(0);
         return create(user, password);
+    }
+
+    @Override
+    public boolean activateUser(String email) {
+        User user = findByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        user.setStatus(1);
+        userRepo.updateStatus(user.getId(), 1);
+        return true;
+    }
+
+    @Override
+    public boolean resetPassword(String email, String rawPassword) {
+        if (email == null || email.isBlank() || rawPassword == null || rawPassword.isBlank()) {
+            return false;
+        }
+        User user = findByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        String passwordHash = PasswordHasher.hash(rawPassword);
+        userRepo.updatePasswordByEmail(email, passwordHash);
+        return true;
     }
 
     @Override
@@ -68,6 +99,9 @@ public class UserServiceImpl implements UserService {
         }
         if (user.getCreatedDate() == null) {
             user.setCreatedDate(new Date(System.currentTimeMillis()));
+        }
+        if (user.getStatus() == null) {
+            user.setStatus(1);
         }
         userRepo.insert(user);
         return true;

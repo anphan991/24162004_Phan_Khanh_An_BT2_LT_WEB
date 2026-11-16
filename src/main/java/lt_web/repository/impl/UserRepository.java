@@ -57,6 +57,25 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public User findByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        EntityManager enma = JpaConfig.getEntityManager();
+        try {
+            TypedQuery<User> query = enma.createQuery(
+                    "SELECT u FROM User u WHERE LOWER(TRIM(u.email)) = :email", User.class);
+            query.setParameter("email", email.trim().toLowerCase(java.util.Locale.ROOT));
+            List<User> results = query.setMaxResults(1).getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            throw new DataAccessException("Không thể tải tài khoản theo email.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
     public User get(String username) {
         return findByUsername(username);
     }
@@ -121,6 +140,51 @@ public class UserRepository implements IUserRepository {
                 trans.rollback();
             }
             throw new DataAccessException("Không thể nâng cấp mật khẩu tài khoản.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
+    public void updateStatus(int userId, int status) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            User user = enma.find(User.class, userId);
+            if (user != null) {
+                user.setStatus(status);
+            }
+            trans.commit();
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new DataAccessException("Không thể cập nhật trạng thái kích hoạt tài khoản.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
+    public void updatePasswordByEmail(String email, String passwordHash) {
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            enma.createQuery("UPDATE User u SET u.passWord = :password WHERE LOWER(TRIM(u.email)) = :email")
+                    .setParameter("password", passwordHash)
+                    .setParameter("email", email.trim().toLowerCase(java.util.Locale.ROOT))
+                    .executeUpdate();
+            trans.commit();
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new DataAccessException("Không thể cập nhật mật khẩu qua email.", e);
         } finally {
             enma.close();
         }

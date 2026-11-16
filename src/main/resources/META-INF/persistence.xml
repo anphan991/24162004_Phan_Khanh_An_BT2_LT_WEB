@@ -9,6 +9,7 @@
         <class>lt_web.entity.Category</class>
         <class>lt_web.entity.User</class>
         <class>lt_web.entity.RememberToken</class>
+        <class>lt_web.entity.OtpToken</class>
         <validation-mode>NONE</validation-mode>
 
         <!-- Mật khẩu thật được JpaConfig đọc từ db.properties hoặc biến môi trường. -->

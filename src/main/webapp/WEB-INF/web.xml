@@ -79,6 +79,42 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>VerifyOtpController</servlet-name>
+        <servlet-class>lt_web.controllers.VerifyOtpController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VerifyOtpController</servlet-name>
+        <url-pattern>/verify-otp</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ResendOtpController</servlet-name>
+        <servlet-class>lt_web.controllers.ResendOtpController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResendOtpController</servlet-name>
+        <url-pattern>/resend-otp</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ForgotPasswordController</servlet-name>
+        <servlet-class>lt_web.controllers.ForgotPasswordController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ForgotPasswordController</servlet-name>
+        <url-pattern>/forgot-password</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ResetPasswordController</servlet-name>
+        <servlet-class>lt_web.controllers.ResetPasswordController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResetPasswordController</servlet-name>
+        <url-pattern>/reset-password</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>LogoutController</servlet-name>
         <servlet-class>lt_web.controllers.LogoutController</servlet-class>
     </servlet>
