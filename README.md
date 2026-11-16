@@ -1,4 +1,4 @@
-# BT2 Lập trình Web - Quản lý danh mục và tài khoản (Servlet/JSP + JPA/Hibernate)
+# BT Lập trình Web - Quản lý danh mục và tài khoản (Servlet/JSP + JPA/Hibernate)
 
 Ứng dụng web Java theo mô hình MVC sử dụng Jakarta Servlet/JSP và **JPA / Hibernate ORM** kết nối MySQL, tập trung vào **CRUD Danh mục (`Category`)**, tìm kiếm có phân trang, upload ảnh biểu tượng, **xác thực & kích hoạt tài khoản bằng OTP qua email**, **đăng nhập với mật khẩu mã hóa (hash password)**, **đăng xuất**, **quên mật khẩu xác thực OTP qua mail**, remember-me token và phân quyền quản trị.
 
@@ -58,7 +58,7 @@ BT2_LT_Web/
 
 ### 2. Đăng nhập với mật khẩu được mã hóa (Hash Password) và Đăng xuất
 - **Đăng nhập (`/login`)**:
-  - Mật khẩu người dùng nhập vào được xác thực bằng `PasswordHasher.matches(rawPassword, storedHash)` (chuẩn PBKDF2 with HMAC-SHA256, 120.000 vòng lặp và muối ngẫu nhiên).
+  - Mật khẩu người dùng nhập vào được xác thực bằng `PasswordHasher.matches(rawPassword, storedHash)` (chuẩn PBKDF2 with HMAC-SHA256, 120.000 vòng lặp và salt ngẫu nhiên).
   - Tự động kiểm tra trạng thái kích hoạt tài khoản: nếu tài khoản có `status == 0`, hệ thống từ chối đăng nhập và hiển thị liên kết trực tiếp để người dùng nhập mã OTP kích hoạt.
   - Hỗ trợ tính năng **Ghi nhớ đăng nhập (Remember Me)** lưu token an toàn trong bảng `remember_tokens` qua cookie HttpOnly.
 - **Đăng xuất (`/logout`)**:
@@ -92,7 +92,7 @@ mail.smtp.starttls.enable=true
 mail.from.name=ShopMVC
 ```
 
-> **Chế độ Dev / Offline**: Nếu chưa cấu hình `mail.smtp.username` hoặc `mail.smtp.password`, hệ thống sẽ tự động chạy ở chế độ fallback: mã OTP được in trực tiếp ra console/terminal dạng banner rõ ràng để giảng viên/sinh viên có thể test chức năng mà không cần nhập App Password của Gmail.
+> Nếu chưa cấu hình `mail.smtp.username` hoặc `mail.smtp.password`, hệ thống sẽ tự động chạy ở chế độ fallback: mã OTP được in trực tiếp ra console để có thể test chức năng mà không cần nhập App Password của Gmail.
 
 ## Cài đặt và chạy
 
@@ -120,7 +120,7 @@ Tạo `src/main/resources/db.properties` từ [`src/main/resources/db.properties
    ```
 2. Deploy `BT2_LT_Web` lên Apache Tomcat 10.1+ / Tomcat 11 (tương thích Jakarta Servlet 6.0).
 
-## Kiểm thử (Unit Tests)
+## Unit Tests
 
 Chạy toàn bộ unit test (21 tests, không cần MySQL):
 
