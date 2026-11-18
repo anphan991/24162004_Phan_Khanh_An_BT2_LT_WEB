@@ -74,7 +74,13 @@
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/video/${formMode == 'edit' ? 'edit' : 'add'}?csrfToken=${sessionScope.csrfToken}"
+        <c:url value="/video/${formMode == 'edit' ? 'edit' : 'add'}" var="formActionUrl">
+            <c:param name="csrfToken" value="${sessionScope.csrfToken}" />
+            <c:if test="${formMode == 'edit'}">
+                <c:param name="id" value="${video.videoId}" />
+            </c:if>
+        </c:url>
+        <form action="${formActionUrl}"
               method="post"
               enctype="multipart/form-data">
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
@@ -150,7 +156,8 @@
                 <label for="videoUrl">Hoặc URL Video / YouTube (tùy chọn nếu không tải tệp từ máy)</label>
                 <input id="videoUrl" class="input-control" type="text" name="videoUrl"
                        value="<c:out value='${video.externalVideo ? video.videoPath : ""}' />"
-                       placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4">
+                       placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
+                       oninput="previewYoutubeUrl(this)">
             </div>
 
             <div class="field-group">
@@ -197,6 +204,23 @@ function previewVideoFile(input) {
         currentVideoBlobUrl = URL.createObjectURL(input.files[0]);
         video.src = currentVideoBlobUrl;
         wrap.style.display = 'block';
+        const urlInput = document.getElementById('videoUrl');
+        if (urlInput) {
+            urlInput.value = '';
+        }
+    }
+}
+function previewYoutubeUrl(input) {
+    const posterInput = document.getElementById('poster');
+    const img = document.getElementById('posterPreview');
+    if (!img || (posterInput && posterInput.files && posterInput.files.length > 0)) {
+        return;
+    }
+    const raw = (input.value || '').trim();
+    const match = raw.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (match && match[1]) {
+        img.src = 'https://img.youtube.com/vi/' + match[1] + '/hqdefault.jpg';
+        img.style.display = 'block';
     }
 }
 </script>

@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 )
 public class Video implements Serializable {
     private static final Pattern YOUTUBE_ID_PATTERN = Pattern.compile(
-            "(?:youtube\\.com/(?:watch\\?v=|embed/|shorts/)|youtu\\.be/)([A-Za-z0-9_-]{11})"
+            "(?:youtube\\.com/(?:watch\\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\\.be/)([A-Za-z0-9_-]{11})"
     );
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

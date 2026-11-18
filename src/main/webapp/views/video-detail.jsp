@@ -152,6 +152,10 @@
         <a class="video-btn-sm" href="${pageContext.request.contextPath}/video">&larr; Quay lại danh sách video</a>
     </div>
 
+    <c:if test="${param.updated == '1'}">
+        <div class="alert alert-success">Đã cập nhật thông tin video thành công.</div>
+    </c:if>
+
     <div class="video-detail-layout">
         <section class="video-player-card" aria-labelledby="detail-video-title">
             <c:url value="/image" var="posterUrl">

@@ -9,7 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import lt_web.entity.User;
 import lt_web.entity.Video;
 import lt_web.exceptions.DataAccessException;
@@ -49,6 +52,9 @@ public class VideoController extends HttpServlet {
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        resp.setHeader("Pragma", "no-cache");
+        resp.setDateHeader("Expires", 0);
         String path = req.getServletPath();
 
         if ("/video/detail".equals(path)) {
@@ -199,10 +205,10 @@ public class VideoController extends HttpServlet {
             return;
         }
 
-        String title = trimOrEmpty(req.getParameter("title"));
-        String description = trimOrNull(req.getParameter("description"));
-        String videoUrl = trimOrNull(req.getParameter("videoUrl"));
-        int active = parseActive(req.getParameter("active"));
+        String title = trimOrEmpty(readFormField(req, "title"));
+        String description = trimOrNull(readFormField(req, "description"));
+        String videoUrl = normalizeExternalUrl(readFormField(req, "videoUrl"));
+        int active = parseActive(readFormField(req, "active"));
 
         Video video = new Video();
         video.setTitle(title);
@@ -306,7 +312,10 @@ public class VideoController extends HttpServlet {
             return;
         }
 
-        int id = parsePositiveInt(firstNonBlank(req.getParameter("id"), req.getParameter("videoId")));
+        int id = parsePositiveInt(firstNonBlank(
+                readFormField(req, "id"),
+                firstNonBlank(readFormField(req, "videoId"), req.getParameter("id"))
+        ));
         if (id <= 0) {
             resp.sendRedirect(req.getContextPath() + "/video?videoError=missing");
             return;
@@ -330,10 +339,10 @@ public class VideoController extends HttpServlet {
             return;
         }
 
-        String title = trimOrEmpty(req.getParameter("title"));
-        String description = trimOrNull(req.getParameter("description"));
-        String videoUrl = trimOrNull(req.getParameter("videoUrl"));
-        int active = parseActive(req.getParameter("active"));
+        String title = trimOrEmpty(readFormField(req, "title"));
+        String description = trimOrNull(readFormField(req, "description"));
+        String videoUrl = normalizeExternalUrl(readFormField(req, "videoUrl"));
+        int active = parseActive(readFormField(req, "active"));
 
         Video draft = new Video();
         draft.setVideoId(existing.getVideoId());
@@ -370,6 +379,9 @@ public class VideoController extends HttpServlet {
             }
             if (storedVideo != null) {
                 updated.setVideoPath(storedVideo);
+                if (storedPoster == null) {
+                    updated.setPoster("default-video-poster.svg");
+                }
             } else if (videoUrl != null && !videoUrl.equals(existing.getVideoPath())) {
                 if (!isValidExternalUrl(videoUrl)) {
                     cleanupUploadedFiles(storedPoster, null);
@@ -377,6 +389,9 @@ public class VideoController extends HttpServlet {
                     return;
                 }
                 updated.setVideoPath(videoUrl);
+                if (storedPoster == null) {
+                    updated.setPoster("default-video-poster.svg");
+                }
             }
 
             validationMessage = ValidationUtil.firstMessage(updated);
@@ -387,7 +402,7 @@ public class VideoController extends HttpServlet {
             }
 
             videoService.update(updated);
-            resp.sendRedirect(req.getContextPath() + "/video?updated=1");
+            resp.sendRedirect(req.getContextPath() + "/video/detail?id=" + existing.getVideoId() + "&updated=1");
         } catch (IllegalStateException e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Tệp tải lên vượt quá dung lượng cho phép", e);
@@ -492,6 +507,38 @@ public class VideoController extends HttpServlet {
 
     private boolean isValidExternalUrl(String url) {
         return url.startsWith("http://") || url.startsWith("https://");
+    }
+
+    private String normalizeExternalUrl(String url) {
+        String trimmed = trimOrNull(url);
+        if (trimmed == null) {
+            return null;
+        }
+        String lower = trimmed.toLowerCase(Locale.ROOT);
+        if (lower.startsWith("www.youtube.com/")
+                || lower.startsWith("youtube.com/")
+                || lower.startsWith("m.youtube.com/")
+                || lower.startsWith("youtu.be/")) {
+            return "https://" + trimmed;
+        }
+        return trimmed;
+    }
+
+    private String readFormField(HttpServletRequest req, String name) {
+        try {
+            String contentType = req.getContentType();
+            if (contentType != null && contentType.toLowerCase(Locale.ROOT).startsWith("multipart/form-data")) {
+                Part part = req.getPart(name);
+                if (part != null) {
+                    try (InputStream in = part.getInputStream()) {
+                        return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // Fallback sang getParameter bên dưới nếu container chưa đọc được Part.
+        }
+        return req.getParameter(name);
     }
 
     private int parsePositiveInt(String value) {

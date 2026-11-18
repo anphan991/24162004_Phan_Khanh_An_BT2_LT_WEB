@@ -135,7 +135,7 @@ public final class JpaConfig {
                 {"Docker in 100 Seconds", "https://www.youtube.com/watch?v=Gjnup-PuquQ", "Đóng gói và triển khai ứng dụng nhất quán bằng Container và Dockerfile.", "164"},
                 {"REST API Concepts and Examples", "https://www.youtube.com/watch?v=-MTSQjw5DrM", "Tìm hiểu kiến trúc RESTful API, các phương thức GET/POST/PUT/DELETE và JSON.", "230"},
                 {"HTTP Crash Course & Exploration", "https://www.youtube.com/watch?v=iYM2zFP3Zn0", "Cơ chế request/response, header, status code và HTTPS trong lập trình Web.", "152"},
-                {"MySQL — The Basics in 100 Seconds", "https://www.youtube.com/watch?v=W2Z7fbCLSTw", "Thực hành tạo bảng, liên kết quan hệ 1-N và truy vấn dữ liệu trong MySQL.", "295"}
+                {"MySQL — The Basics in 100 Seconds", "https://www.youtube.com/watch?v=Cz3WcZLRaWc", "Thực hành tạo bảng, liên kết quan hệ 1-N và truy vấn dữ liệu trong MySQL.", "295"}
         };
         LocalDateTime baseTime = LocalDateTime.now().minusDays(2);
         for (int i = 0; i < samples.length; i++) {
