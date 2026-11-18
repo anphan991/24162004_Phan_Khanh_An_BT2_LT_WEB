@@ -10,14 +10,23 @@ import java.util.List;
 import jakarta.servlet.http.HttpSession;
 import lt_web.exceptions.DataAccessException;
 import lt_web.entity.Category;
+import lt_web.entity.User;
+import lt_web.entity.Video;
 import lt_web.services.CategoryService;
+import lt_web.services.UserService;
+import lt_web.services.VideoService;
 import lt_web.services.impl.CategoryServiceImpl;
+import lt_web.services.impl.UserServiceImpl;
+import lt_web.services.impl.VideoServiceImpl;
+import lt_web.utils.Constant;
 
 @WebServlet(urlPatterns = {"/", "/home", "/admin", "/admin/home", "/manager/home"})
 public class HomeServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final CategoryService cateService = new CategoryServiceImpl();
+    private final VideoService videoService = new VideoServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -32,14 +41,23 @@ public class HomeServlet extends HttpServlet {
             return;
         }
 
-        HttpSession session = request.getSession(false);
-        boolean authenticated = session != null
-                && session.getAttribute(lt_web.utils.Constant.SESSION_ACCOUNT) != null;
+        boolean authenticated = isAuthenticated(request);
         if (!authenticated && !"/home".equals(path)) {
+            request.setAttribute("latestVideos", List.of());
             request.setAttribute("cateList", List.of());
             request.getRequestDispatcher("/views/index.jsp").forward(request, response);
             return;
         }
+
+        List<Video> latestVideos;
+        try {
+            latestVideos = videoService.findLatest(10);
+        } catch (DataAccessException e) {
+            log("Không thể tải danh sách video mới nhất", e);
+            latestVideos = List.of();
+            request.setAttribute("videoDbError", "Không thể tải danh sách video mới nhất. Hãy kiểm tra kết nối MySQL.");
+        }
+        request.setAttribute("latestVideos", latestVideos);
 
         String keyword = request.getParameter("keyword");
         List<Category> cateList;
@@ -64,5 +82,25 @@ public class HomeServlet extends HttpServlet {
             request.getRequestDispatcher("/views/index.jsp")
                     .forward(request, response);
         }
+    }
+
+    private boolean isAuthenticated(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        if (session.getAttribute(Constant.SESSION_ACCOUNT) instanceof User) {
+            return true;
+        }
+        Object usernameObj = session.getAttribute(Constant.SESSION_USERNAME);
+        if (usernameObj instanceof String username && !username.isBlank()) {
+            User account = userService.get(username);
+            if (account != null) {
+                session.setAttribute(Constant.SESSION_ACCOUNT, account);
+                session.setAttribute(Constant.SESSION_USERNAME, account.getUserName());
+                return true;
+            }
+        }
+        return false;
     }
 }

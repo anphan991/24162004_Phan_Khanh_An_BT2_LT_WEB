@@ -42,7 +42,7 @@ public class CsrfFilter implements Filter {
 
     private boolean needsSession(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path == null || !path.startsWith("/image");
+        return path == null || (!path.startsWith("/image") && !path.startsWith("/video-file"));
     }
 
     private boolean isStaticResource(HttpServletRequest request) {

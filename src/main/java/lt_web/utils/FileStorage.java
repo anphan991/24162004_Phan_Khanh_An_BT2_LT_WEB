@@ -11,18 +11,54 @@ import java.util.UUID;
 
 public final class FileStorage {
     private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "svg", "webp");
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of("mp4", "webm", "ogg", "mov", "mkv");
 
     private FileStorage() {
     }
 
     public static String saveImage(Part part) throws IOException {
-        if (part == null || part.getSize() == 0 || part.getSubmittedFileName() == null) {
+        return savePart(part, IMAGE_EXTENSIONS, "Định dạng ảnh không được hỗ trợ.");
+    }
+
+    public static String saveVideo(Part part) throws IOException {
+        return savePart(part, VIDEO_EXTENSIONS, "Định dạng video không được hỗ trợ (hỗ trợ MP4, WEBM, OGG, MOV, MKV).");
+    }
+
+    public static String getFileName(Part part) {
+        if (part == null) {
             return null;
         }
-        String originalName = Path.of(part.getSubmittedFileName()).getFileName().toString();
+        String submitted = part.getSubmittedFileName();
+        if (submitted != null && !submitted.isBlank()) {
+            return Path.of(submitted).getFileName().toString();
+        }
+        String contentDisposition = part.getHeader("content-disposition");
+        if (contentDisposition != null) {
+            for (String content : contentDisposition.split(";")) {
+                String trimmed = content.trim();
+                if (trimmed.startsWith("filename")) {
+                    int eq = trimmed.indexOf('=');
+                    if (eq >= 0) {
+                        String name = trimmed.substring(eq + 1).trim().replace("\"", "");
+                        if (!name.isBlank()) {
+                            return Path.of(name).getFileName().toString();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String savePart(Part part, Set<String> allowedExtensions, String invalidTypeMessage)
+            throws IOException {
+        String originalName = getFileName(part);
+        if (part == null || part.getSize() == 0 || originalName == null || originalName.isBlank()) {
+            return null;
+        }
         String extension = extensionOf(originalName);
-        if (!IMAGE_EXTENSIONS.contains(extension)) {
-            throw new IOException("Định dạng ảnh không được hỗ trợ.");
+        if (!allowedExtensions.contains(extension)) {
+            throw new IOException(invalidTypeMessage);
         }
 
         Path directory = Constant.uploadDirectory();
@@ -30,7 +66,7 @@ public final class FileStorage {
         String storedName = UUID.randomUUID() + "." + extension;
         Path target = directory.resolve(storedName).normalize();
         if (!target.startsWith(directory)) {
-            throw new IOException("Đường dẫn lưu ảnh không hợp lệ.");
+            throw new IOException("Đường dẫn lưu tệp không hợp lệ.");
         }
         try (var input = part.getInputStream()) {
             Files.copy(input, target, StandardCopyOption.REPLACE_EXISTING);
@@ -55,7 +91,10 @@ public final class FileStorage {
     }
 
     public static void deleteQuietly(String fileName) {
-        if (fileName == null || fileName.isBlank() || fileName.startsWith("default-")) {
+        if (fileName == null || fileName.isBlank()
+                || fileName.startsWith("default-")
+                || fileName.startsWith("http://")
+                || fileName.startsWith("https://")) {
             return;
         }
         try {

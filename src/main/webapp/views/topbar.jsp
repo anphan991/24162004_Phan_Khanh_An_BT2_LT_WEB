@@ -11,6 +11,7 @@
         <nav class="topbar-nav" aria-label="Menu chính">
             <a href="${pageContext.request.contextPath}/">Trang chủ</a>
             <c:if test="${sessionScope.account != null}">
+                <a href="${pageContext.request.contextPath}/video">Video</a>
                 <a href="${pageContext.request.contextPath}/home">Danh mục</a>
             </c:if>
             <c:if test="${sessionScope.account != null && (sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2)}">

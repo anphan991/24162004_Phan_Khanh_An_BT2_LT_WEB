@@ -45,6 +45,24 @@ public class DownloadImageController extends HttpServlet {
         }
 
         resp.setContentType("image/svg+xml;charset=UTF-8");
+        if (fileName != null && fileName.startsWith("default-video")) {
+            String videoPosterSvg = """
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" width="400" height="225">
+                      <defs>
+                        <linearGradient id="vg" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#172033"/>
+                          <stop offset="100%" stop-color="#2358c4"/>
+                        </linearGradient>
+                      </defs>
+                      <rect width="400" height="225" fill="url(#vg)"/>
+                      <circle cx="200" cy="105" r="34" fill="rgba(255,255,255,0.18)" stroke="#ffffff" stroke-width="2.5"/>
+                      <polygon points="190,89 190,121 218,105" fill="#ffffff"/>
+                      <text x="200" y="168" font-family="Arial, sans-serif" font-size="14" fill="#e2e8f0" text-anchor="middle" font-weight="bold">ShopMVC Video</text>
+                    </svg>
+                    """;
+            resp.getOutputStream().write(videoPosterSvg.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
         String color = "#1976d2";
         String label = "Danh mục";
         if ("default-women.svg".equalsIgnoreCase(fileName)) {

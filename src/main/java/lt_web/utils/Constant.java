@@ -38,6 +38,9 @@ public class Constant {
         public static final String FORGOT_PASSWORD = "/views/forgot-password.jsp";
         public static final String RESET_PASSWORD = "/views/reset-password.jsp";
         public static final String HOME = "/views/home.jsp";
+        public static final String VIDEO_LIST = "/views/video-list.jsp";
+        public static final String VIDEO_DETAIL = "/views/video-detail.jsp";
+        public static final String VIDEO_FORM = "/views/video-form.jsp";
         public static final String ADMIN_LIST_CATEGORY = "/views/admin/list-category.jsp";
         public static final String ADMIN_ADD_CATEGORY = "/views/admin/add-category.jsp";
         public static final String ADMIN_EDIT_CATEGORY = "/views/admin/edit-category.jsp";

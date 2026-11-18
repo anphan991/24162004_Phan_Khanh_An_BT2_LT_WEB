@@ -36,6 +36,9 @@
         <url-pattern>/admin</url-pattern>
         <url-pattern>/manager/*</url-pattern>
         <url-pattern>/home</url-pattern>
+        <url-pattern>/video</url-pattern>
+        <url-pattern>/video/*</url-pattern>
+        <url-pattern>/video-file</url-pattern>
     </filter-mapping>
 
     <servlet>
@@ -139,6 +142,39 @@
     <servlet-mapping>
         <servlet-name>DownloadImageController</servlet-name>
         <url-pattern>/image</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DownloadVideoController</servlet-name>
+        <servlet-class>lt_web.controllers.DownloadVideoController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DownloadVideoController</servlet-name>
+        <url-pattern>/video-file</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>VideoController</servlet-name>
+        <servlet-class>lt_web.controllers.VideoController</servlet-class>
+        <multipart-config>
+            <file-size-threshold>2097152</file-size-threshold>
+            <max-file-size>104857600</max-file-size>
+            <max-request-size>125829120</max-request-size>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VideoController</servlet-name>
+        <url-pattern>/video</url-pattern>
+        <url-pattern>/video/detail</url-pattern>
+        <url-pattern>/video/add</url-pattern>
+        <url-pattern>/video/edit</url-pattern>
+        <url-pattern>/video/delete</url-pattern>
+        <url-pattern>/video/clear-samples</url-pattern>
+        <url-pattern>/admin/video/list</url-pattern>
+        <url-pattern>/admin/video/add</url-pattern>
+        <url-pattern>/admin/video/edit</url-pattern>
+        <url-pattern>/admin/video/delete</url-pattern>
+        <url-pattern>/admin/video/clear-samples</url-pattern>
     </servlet-mapping>
 
     <servlet>

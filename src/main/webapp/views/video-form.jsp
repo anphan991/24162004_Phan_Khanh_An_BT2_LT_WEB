@@ -1,0 +1,199 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${formMode == 'edit' ? 'Cập nhật Video' : 'Thêm Video mới'} - ShopMVC</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261116-v2">
+    <style>
+        .video-form-card {
+            max-width: 760px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+        }
+        .textarea-control {
+            width: 100%;
+            min-height: 110px;
+            padding: 10px 14px;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font: inherit;
+            resize: vertical;
+        }
+        .textarea-control:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, .15);
+        }
+        .video-btn-sm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 34px;
+            padding: 0 14px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+        .video-btn-sm:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+<jsp:include page="/views/topbar.jsp" />
+
+<main class="page-container member-main">
+    <section class="video-form-card" aria-labelledby="video-form-title">
+        <div class="section-heading" style="margin-bottom: 20px;">
+            <div>
+                <h1 id="video-form-title" style="margin: 0; font-size: 24px;">
+                    ${formMode == 'edit' ? 'Cập nhật Video' : 'Thêm Video mới'}
+                </h1>
+                <p>Tải lên ảnh poster và tệp video bằng Servlet MultipartConfig</p>
+            </div>
+            <a class="video-btn-sm" href="${pageContext.request.contextPath}/video">Quay lại danh sách</a>
+        </div>
+
+        <c:if test="${not empty alert}">
+            <div class="alert alert-danger"><c:out value="${alert}" /></div>
+        </c:if>
+
+        <form action="${pageContext.request.contextPath}/video/${formMode == 'edit' ? 'edit' : 'add'}?csrfToken=${sessionScope.csrfToken}"
+              method="post"
+              enctype="multipart/form-data">
+            <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
+            <c:if test="${formMode == 'edit'}">
+                <input type="hidden" name="id" value="${video.videoId}">
+            </c:if>
+
+            <div class="field-group">
+                <label for="title">Tiêu đề video *</label>
+                <input id="title" class="input-control" type="text" name="title"
+                       value="<c:out value='${video.title}' />"
+                       placeholder="Ví dụ: Hướng dẫn phối đồ công sở" required maxlength="255">
+            </div>
+
+            <div class="field-group">
+                <label for="description">Mô tả chi tiết</label>
+                <textarea id="description" class="textarea-control" name="description"
+                          maxlength="2000" placeholder="Nhập mô tả nội dung video..."><c:out value="${video.description}" /></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="field-group">
+                    <label for="poster">Ảnh poster (JPG, PNG, SVG, WEBP)</label>
+                    <input id="poster" class="input-control" type="file" name="poster" accept="image/*" onchange="previewPosterFile(this)">
+                    <c:choose>
+                        <c:when test="${formMode == 'edit' && not empty video.poster}">
+                            <c:url value="/image" var="currentPosterUrl">
+                                <c:param name="fname" value="${video.poster}" />
+                            </c:url>
+                            <div style="margin-top: 8px;">
+                                <img id="posterPreview" src="${currentPosterUrl}" alt="Xem trước poster" style="width: 160px; height: 90px; object-fit: cover; border: 1px solid #cbd5e1; border-radius: 6px; display: block;">
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div style="margin-top: 8px;">
+                                <img id="posterPreview" alt="Xem trước poster" style="width: 160px; height: 90px; object-fit: cover; border: 1px solid #cbd5e1; border-radius: 6px; display: none;">
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div class="field-group">
+                    <label for="videoFile">Tệp Video (MP4, WEBM, OGG, MOV · tối đa 100MB)</label>
+                    <input id="videoFile" class="input-control" type="file" name="videoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" onchange="previewVideoFile(this)">
+                    <c:if test="${formMode == 'edit' && not empty video.videoPath}">
+                        <p class="demo-note" style="margin-top: 6px;">Video hiện tại: <strong><c:out value="${video.videoPath}" /></strong> (chọn tệp mới hoặc dán URL mới ở dưới để thay thế)</p>
+                    </c:if>
+                    <div id="videoPreviewWrap" style="margin-top: 8px; display: ${formMode == 'edit' && !video.sampleVideo && !video.externalVideo ? 'block' : 'none'};">
+                        <c:choose>
+                            <c:when test="${formMode == 'edit' && !video.sampleVideo && !video.externalVideo}">
+                                <c:url value="/video-file" var="currentVideoSrc">
+                                    <c:param name="fname" value="${video.videoPath}" />
+                                </c:url>
+                                <video id="videoPreview" controls preload="metadata"
+                                       src="${currentVideoSrc}"
+                                       style="width: 100%; max-width: 280px; aspect-ratio: 16 / 9; background: #0f172a; border-radius: 6px; display: block;"></video>
+                            </c:when>
+                            <c:otherwise>
+                                <video id="videoPreview" controls preload="metadata"
+                                       style="width: 100%; max-width: 280px; aspect-ratio: 16 / 9; background: #0f172a; border-radius: 6px; display: block;"></video>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="videoUrl">Hoặc URL Video / YouTube (tùy chọn nếu không tải tệp từ máy)</label>
+                <input id="videoUrl" class="input-control" type="text" name="videoUrl"
+                       value="<c:out value='${video.externalVideo ? video.videoPath : ""}' />"
+                       placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4">
+            </div>
+
+            <div class="field-group">
+                <label for="active">Trạng thái hiển thị</label>
+                <select id="active" class="input-control" name="active">
+                    <option value="1" ${video.active != 0 ? 'selected' : ''}>Hiển thị công khai</option>
+                    <option value="0" ${video.active == 0 ? 'selected' : ''}>Ẩn video</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="button button-primary" type="submit">
+                    ${formMode == 'edit' ? 'Lưu thay đổi' : 'Đăng video'}
+                </button>
+                <a class="button button-quiet" href="${pageContext.request.contextPath}/video">Hủy</a>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script>
+let currentVideoBlobUrl = null;
+function previewPosterFile(input) {
+    const img = document.getElementById('posterPreview');
+    if (!img) return;
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function previewVideoFile(input) {
+    const wrap = document.getElementById('videoPreviewWrap');
+    const video = document.getElementById('videoPreview');
+    if (!wrap || !video) return;
+    if (currentVideoBlobUrl) {
+        URL.revokeObjectURL(currentVideoBlobUrl);
+        currentVideoBlobUrl = null;
+    }
+    if (input.files && input.files[0]) {
+        currentVideoBlobUrl = URL.createObjectURL(input.files[0]);
+        video.src = currentVideoBlobUrl;
+        wrap.style.display = 'block';
+    }
+}
+</script>
+</body>
+</html>

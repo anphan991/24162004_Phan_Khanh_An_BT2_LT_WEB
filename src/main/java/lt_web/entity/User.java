@@ -2,12 +2,15 @@ package lt_web.entity;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -57,6 +60,9 @@ public class User implements Serializable {
 
     @Column(name = "status")
     private Integer status = 1;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Video> videos;
 
     public User() {
     }
@@ -192,5 +198,13 @@ public class User implements Serializable {
 
     public boolean isActive() {
         return getStatus() == 1;
+    }
+
+    public List<Video> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(List<Video> videos) {
+        this.videos = videos;
     }
 }

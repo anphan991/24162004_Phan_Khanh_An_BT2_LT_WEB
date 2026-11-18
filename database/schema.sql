@@ -45,3 +45,19 @@ CREATE TABLE IF NOT EXISTS otp_tokens (
     INDEX idx_otp_email_type (email, otp_type),
     INDEX idx_otp_expiry (expires_at)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS Videos (
+    video_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    poster VARCHAR(255) NULL,
+    video_path VARCHAR(500) NULL,
+    description VARCHAR(2000) NULL,
+    views INT NOT NULL DEFAULT 0,
+    active INT NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NOT NULL,
+    CONSTRAINT fk_videos_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_videos_user (user_id),
+    INDEX idx_videos_created (created_at)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
