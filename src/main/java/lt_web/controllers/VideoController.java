@@ -28,12 +28,10 @@ import lt_web.utils.ValidationUtil;
         "/video/add",
         "/video/edit",
         "/video/delete",
-        "/video/clear-samples",
         "/admin/video/list",
         "/admin/video/add",
         "/admin/video/edit",
-        "/admin/video/delete",
-        "/admin/video/clear-samples"
+        "/admin/video/delete"
 })
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2,
@@ -77,8 +75,6 @@ public class VideoController extends HttpServlet {
             handleEditSubmit(req, resp);
         } else if ("/video/delete".equals(path) || "/admin/video/delete".equals(path)) {
             handleDelete(req, resp);
-        } else if ("/video/clear-samples".equals(path) || "/admin/video/clear-samples".equals(path)) {
-            handleClearSamples(req, resp);
         } else {
             resp.sendRedirect(req.getContextPath() + "/video");
         }
@@ -128,8 +124,6 @@ public class VideoController extends HttpServlet {
             int pageOffset = (currentPage - 1) * PAGE_SIZE;
 
             List<Video> videoList = videoService.search(keyword, filterUserId, currentPage, PAGE_SIZE);
-            boolean hasSampleVideos = videoService.findAll().stream()
-                    .anyMatch(v -> v.isSampleVideo() && canManageVideo(account, v));
             req.setAttribute("videoList", videoList);
             req.setAttribute("currentPage", currentPage);
             req.setAttribute("totalPages", totalPages);
@@ -139,7 +133,6 @@ public class VideoController extends HttpServlet {
             req.setAttribute("scope", effectiveScope);
             req.setAttribute("selectedUserId", filterUserId);
             req.setAttribute("showingAllFallback", showingAllFallback);
-            req.setAttribute("hasSampleVideos", hasSampleVideos);
         } catch (DataAccessException e) {
             log("Không thể tải danh sách video", e);
             req.setAttribute("videoList", List.of());
@@ -149,7 +142,6 @@ public class VideoController extends HttpServlet {
             req.setAttribute("pageOffset", 0);
             req.setAttribute("keyword", keyword);
             req.setAttribute("scope", effectiveScope);
-            req.setAttribute("hasSampleVideos", false);
             req.setAttribute("dbError", "Không thể tải danh sách video. Hãy kiểm tra kết nối MySQL.");
         }
 
@@ -439,29 +431,6 @@ public class VideoController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/video?deleted=1");
         } catch (DataAccessException e) {
             log("Không thể xóa video", e);
-            resp.sendRedirect(req.getContextPath() + "/video?videoError=delete");
-        }
-    }
-
-    private void handleClearSamples(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        User account = resolveAccount(req);
-        if (account == null) {
-            resp.sendRedirect(req.getContextPath() + "/login?requireAuth=1");
-            return;
-        }
-
-        try {
-            int deletedCount = 0;
-            for (Video video : videoService.findAll()) {
-                if (video.isSampleVideo() && canManageVideo(account, video)) {
-                    videoService.delete(video.getVideoId());
-                    deletedCount++;
-                }
-            }
-            resp.sendRedirect(req.getContextPath() + "/video?clearedSamples=" + deletedCount);
-        } catch (DataAccessException e) {
-            log("Không thể xóa các video mẫu", e);
             resp.sendRedirect(req.getContextPath() + "/video?videoError=delete");
         }
     }

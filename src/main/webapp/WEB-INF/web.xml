@@ -169,12 +169,10 @@
         <url-pattern>/video/add</url-pattern>
         <url-pattern>/video/edit</url-pattern>
         <url-pattern>/video/delete</url-pattern>
-        <url-pattern>/video/clear-samples</url-pattern>
         <url-pattern>/admin/video/list</url-pattern>
         <url-pattern>/admin/video/add</url-pattern>
         <url-pattern>/admin/video/edit</url-pattern>
         <url-pattern>/admin/video/delete</url-pattern>
-        <url-pattern>/admin/video/clear-samples</url-pattern>
     </servlet-mapping>
 
     <servlet>

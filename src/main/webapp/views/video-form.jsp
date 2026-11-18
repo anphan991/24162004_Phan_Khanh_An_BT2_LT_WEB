@@ -100,6 +100,11 @@
                     <label for="poster">Ảnh poster (JPG, PNG, SVG, WEBP)</label>
                     <input id="poster" class="input-control" type="file" name="poster" accept="image/*" onchange="previewPosterFile(this)">
                     <c:choose>
+                        <c:when test="${formMode == 'edit' && video.youtubeVideo && !video.customPoster}">
+                            <div style="margin-top: 8px;">
+                                <img id="posterPreview" src="${video.youtubeThumbnailUrl}" alt="Xem trước poster" style="width: 160px; height: 90px; object-fit: cover; border: 1px solid #cbd5e1; border-radius: 6px; display: block;">
+                            </div>
+                        </c:when>
                         <c:when test="${formMode == 'edit' && not empty video.poster}">
                             <c:url value="/image" var="currentPosterUrl">
                                 <c:param name="fname" value="${video.poster}" />

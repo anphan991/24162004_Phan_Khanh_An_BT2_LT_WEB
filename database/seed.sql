@@ -18,23 +18,25 @@ INSERT IGNORE INTO Category (cate_name, icons) VALUES
     ('Quần Áo Nữ', 'default-women.svg'),
     ('Giày', 'default-category.svg');
 
--- Dữ liệu mẫu 12 Videos gắn với tài khoản admin (quan hệ 1-N User - Videos)
+-- Dữ liệu mẫu 10 Videos YouTube gắn với tài khoản admin (quan hệ 1-N User - Videos)
 INSERT INTO Videos (title, poster, video_path, description, views, active, created_at, user_id)
-SELECT v.title, 'default-video-poster.svg', 'default-video.mp4', v.description, v.views, 1, v.created_at, u.id
+SELECT v.title, 'default-video-poster.svg', v.video_path, v.description, v.views, 1, v.created_at, u.id
 FROM users u
 CROSS JOIN (
-    SELECT 'Giới thiệu bộ sưu tập Thu Đông 2026' AS title, 'Tổng hợp các mẫu áo khoác và áo len nổi bật cho mùa Thu Đông.' AS description, 128 AS views, DATE_SUB(NOW(), INTERVAL 12 HOUR) AS created_at
-    UNION ALL SELECT 'Hướng dẫn chọn size áo sơ mi nam chuẩn dáng', 'Mẹo đo vòng ngực, chiều dài vai để chọn áo vừa vặn nhất.', 95, DATE_SUB(NOW(), INTERVAL 11 HOUR)
-    UNION ALL SELECT 'Top 5 đôi giày sneaker dễ phối đồ nhất', 'Những mẫu giày basic phù hợp đi học, đi làm và dạo phố.', 210, DATE_SUB(NOW(), INTERVAL 10 HOUR)
-    UNION ALL SELECT 'Cách bảo quản đồ jean luôn bền màu', 'Lưu ý khi giặt và phơi giúp quần jean không bị phai hay co rút.', 74, DATE_SUB(NOW(), INTERVAL 9 HOUR)
-    UNION ALL SELECT 'Phối đồ công sở thanh lịch cho nữ', 'Gợi ý set blazer, chân váy và áo kiểu nhẹ nhàng nơi công sở.', 156, DATE_SUB(NOW(), INTERVAL 8 HOUR)
-    UNION ALL SELECT 'Review chi tiết áo khoác dù chống nước', 'Kiểm tra chất liệu vải, đường may và độ thoáng khí thực tế.', 182, DATE_SUB(NOW(), INTERVAL 7 HOUR)
-    UNION ALL SELECT 'Xu hướng phụ kiện tối giản năm 2026', 'Thắt lưng da, túi đeo chéo và đồng hồ dây vải tinh tế.', 63, DATE_SUB(NOW(), INTERVAL 6 HOUR)
-    UNION ALL SELECT 'Bí quyết chọn chất liệu cotton thoáng mát mùa hè', 'So sánh cotton 100%, cotton compact và vải linen tự nhiên.', 112, DATE_SUB(NOW(), INTERVAL 5 HOUR)
-    UNION ALL SELECT '3 kiểu phối áo polo trẻ trung cuối tuần', 'Kết hợp áo polo với quần chinos, short hoặc denim.', 88, DATE_SUB(NOW(), INTERVAL 4 HOUR)
-    UNION ALL SELECT 'Hướng dẫn vệ sinh giày trắng tại nhà', 'Cách làm sạch đế và thân giày nhanh chóng không làm ố vàng.', 245, DATE_SUB(NOW(), INTERVAL 3 HOUR)
-    UNION ALL SELECT 'Lookbook dạo phố phong cách Streetwear', 'Gợi ý outfit năng động với hoodie oversize và quần cargo.', 190, DATE_SUB(NOW(), INTERVAL 2 HOUR)
-    UNION ALL SELECT 'Tổng hợp ưu đãi thành viên mới ShopMVC', 'Hướng dẫn đăng ký, kích hoạt OTP và theo dõi danh mục mới.', 320, DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    SELECT 'Java in 100 Seconds' AS title, 'https://www.youtube.com/watch?v=l9AzO1FMgM8' AS video_path, 'Tổng quan nhanh về ngôn ngữ lập trình Java, JVM và hệ sinh thái doanh nghiệp.' AS description, 340 AS views, DATE_SUB(NOW(), INTERVAL 10 HOUR) AS created_at
+    UNION ALL SELECT 'HTML in 100 Seconds', 'https://www.youtube.com/watch?v=ok-plXXHlWw', 'Cấu trúc tài liệu HTML, các thẻ ngữ nghĩa cơ bản khi xây dựng trang web.', 215, DATE_SUB(NOW(), INTERVAL 9 HOUR)
+    UNION ALL SELECT 'CSS in 100 Seconds', 'https://www.youtube.com/watch?v=OEV8gMkCHXQ', 'Cách định kiểu giao diện, Flexbox, Grid và bố cục responsive cho website.', 189, DATE_SUB(NOW(), INTERVAL 8 HOUR)
+    UNION ALL SELECT 'JavaScript in 100 Seconds', 'https://www.youtube.com/watch?v=DHjqpvDnNGE', 'Giới thiệu nhanh về JavaScript, DOM, xử lý sự kiện và bất đồng bộ.', 412, DATE_SUB(NOW(), INTERVAL 7 HOUR)
+    UNION ALL SELECT 'SQL in 100 Seconds', 'https://www.youtube.com/watch?v=zsjvFFKOm3c', 'Nguyên lý cơ sở dữ liệu quan hệ, khóa chính, khóa ngoại và truy vấn SQL.', 276, DATE_SUB(NOW(), INTERVAL 6 HOUR)
+    UNION ALL SELECT 'Git Explained in 100 Seconds', 'https://www.youtube.com/watch?v=hwP7WQkmECE', 'Cách quản lý phiên bản mã nguồn với commit, branch, merge và push lên GitHub.', 198, DATE_SUB(NOW(), INTERVAL 5 HOUR)
+    UNION ALL SELECT 'Docker in 100 Seconds', 'https://www.youtube.com/watch?v=Gjnup-PuquQ', 'Đóng gói và triển khai ứng dụng nhất quán bằng Container và Dockerfile.', 164, DATE_SUB(NOW(), INTERVAL 4 HOUR)
+    UNION ALL SELECT 'REST API Concepts and Examples', 'https://www.youtube.com/watch?v=-MTSQjw5DrM', 'Tìm hiểu kiến trúc RESTful API, các phương thức GET/POST/PUT/DELETE và JSON.', 230, DATE_SUB(NOW(), INTERVAL 3 HOUR)
+    UNION ALL SELECT 'HTTP Crash Course & Exploration', 'https://www.youtube.com/watch?v=iYM2zFP3Zn0', 'Cơ chế request/response, header, status code và HTTPS trong lập trình Web.', 152, DATE_SUB(NOW(), INTERVAL 2 HOUR)
+    UNION ALL SELECT 'MySQL — The Basics in 100 Seconds', 'https://www.youtube.com/watch?v=W2Z7fbCLSTw', 'Thực hành tạo bảng, liên kết quan hệ 1-N và truy vấn dữ liệu trong MySQL.', 295, DATE_SUB(NOW(), INTERVAL 1 HOUR)
 ) v
 WHERE u.username = 'admin'
-  AND NOT EXISTS (SELECT 1 FROM (SELECT video_id FROM Videos LIMIT 1) AS existing_videos);
+  AND NOT EXISTS (
+      SELECT 1 FROM (
+          SELECT video_id FROM Videos WHERE video_path LIKE 'https://www.youtube.com/watch?v=%' LIMIT 1
+      ) AS existing_yt
+  );

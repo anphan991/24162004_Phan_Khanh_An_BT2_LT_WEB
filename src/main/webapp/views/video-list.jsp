@@ -255,17 +255,9 @@
     <div class="section-heading">
         <div>
             <h1>Thư viện Video</h1>
-            <p>Hiển thị 6 video / trang · bấm vào tiêu đề để xem chi tiết &amp; phát video</p>
+            <p>Hiển thị 6 video / trang - bấm vào tiêu đề để xem chi tiết và phát video</p>
         </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-            <c:if test="${hasSampleVideos}">
-                <form class="video-inline-form" action="${pageContext.request.contextPath}/video/clear-samples" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ video mẫu để thay bằng video của riêng mình không?');">
-                    <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
-                    <button class="button button-quiet" type="submit" style="color: #dc2626; border-color: #fecaca;">Xóa tất cả video mẫu</button>
-                </form>
-            </c:if>
-            <a class="button button-primary" href="${pageContext.request.contextPath}/video/add">+ Thêm video mới</a>
-        </div>
+        <a class="button button-primary" href="${pageContext.request.contextPath}/video/add">+ Thêm video mới</a>
     </div>
 
     <c:if test="${param.saved == '1'}">
@@ -276,16 +268,6 @@
     </c:if>
     <c:if test="${param.deleted == '1'}">
         <div class="alert alert-success">Đã xóa video thành công.</div>
-    </c:if>
-    <c:if test="${param.clearedSamples != null}">
-        <c:choose>
-            <c:when test="${param.clearedSamples == '0'}">
-                <div class="alert alert-warning">Không còn video mẫu nào thuộc quyền quản lý của bạn để xóa.</div>
-            </c:when>
-            <c:otherwise>
-                <div class="alert alert-success">Đã xóa <c:out value="${param.clearedSamples}" /> video mẫu thành công. Bạn có thể bấm <strong>+ Thêm video mới</strong> để đăng video của riêng mình.</div>
-            </c:otherwise>
-        </c:choose>
     </c:if>
     <c:if test="${param.videoError == 'missing'}">
         <div class="alert alert-danger">Video không tồn tại hoặc đã bị xóa.</div>
@@ -300,7 +282,7 @@
         <div class="alert alert-danger"><c:out value="${dbError}" /></div>
     </c:if>
     <c:if test="${showingAllFallback}">
-        <div class="alert alert-warning">Tài khoản của bạn chưa đăng video nào nên đang hiển thị tất cả video (6 video/trang). Bạn có thể bấm <strong>+ Thêm video mới</strong> để đăng video của riêng mình.</div>
+        <div class="alert alert-warning">Tài khoản của bạn chưa đăng video nào.</div>
     </c:if>
 
     <div class="video-toolbar">

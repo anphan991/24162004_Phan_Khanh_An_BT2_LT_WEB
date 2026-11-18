@@ -12,9 +12,11 @@ import lt_web.repository.IVideoRepository;
 import lt_web.repository.JpaConfig;
 
 public class VideoRepository implements IVideoRepository {
+    private static volatile boolean sampleVideosCleaned = false;
 
     @Override
     public List<Video> findAll() {
+        ensureSampleVideosCleaned();
         EntityManager enma = JpaConfig.getEntityManager();
         try {
             return enma.createNamedQuery("Video.findAll", Video.class).getResultList();
@@ -32,6 +34,7 @@ public class VideoRepository implements IVideoRepository {
 
     @Override
     public List<Video> findLatest(int limit) {
+        ensureSampleVideosCleaned();
         int safeLimit = Math.max(limit, 1);
         EntityManager enma = JpaConfig.getEntityManager();
         try {
@@ -49,6 +52,7 @@ public class VideoRepository implements IVideoRepository {
 
     @Override
     public List<Video> findByUserId(int userId) {
+        ensureSampleVideosCleaned();
         EntityManager enma = JpaConfig.getEntityManager();
         try {
             TypedQuery<Video> query = enma.createQuery(
@@ -80,6 +84,7 @@ public class VideoRepository implements IVideoRepository {
 
     @Override
     public List<Video> search(String keyword, Integer userId, int page, int pagesize) {
+        ensureSampleVideosCleaned();
         int safePage = Math.max(page, 1);
         int safeSize = Math.max(pagesize, 1);
         String normalizedKeyword = normalizeKeyword(keyword);
@@ -108,6 +113,7 @@ public class VideoRepository implements IVideoRepository {
 
     @Override
     public int countSearch(String keyword, Integer userId) {
+        ensureSampleVideosCleaned();
         String normalizedKeyword = normalizeKeyword(keyword);
         EntityManager enma = JpaConfig.getEntityManager();
         try {
@@ -242,6 +248,32 @@ public class VideoRepository implements IVideoRepository {
         }
         if (normalizedKeyword != null) {
             query.setParameter("pattern", "%" + normalizedKeyword + "%");
+        }
+    }
+
+    private void ensureSampleVideosCleaned() {
+        if (sampleVideosCleaned) {
+            return;
+        }
+        synchronized (VideoRepository.class) {
+            if (sampleVideosCleaned) {
+                return;
+            }
+            try (EntityManager enma = JpaConfig.getEntityManager()) {
+                EntityTransaction trans = enma.getTransaction();
+                try {
+                    trans.begin();
+                    JpaConfig.seedDefaultYoutubeVideos(enma);
+                    trans.commit();
+                    sampleVideosCleaned = true;
+                } catch (Exception e) {
+                    if (trans.isActive()) {
+                        trans.rollback();
+                    }
+                }
+            } catch (Exception ignored) {
+                // Thử lại ở lần truy vấn tiếp theo nếu DB chưa sẵn sàng.
+            }
         }
     }
 }
