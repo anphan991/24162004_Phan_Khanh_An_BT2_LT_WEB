@@ -6,12 +6,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.exceptions.DataAccessException;
 import lt_web.entity.User;
 import lt_web.services.UserService;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.utils.AdminAccess;
 import lt_web.utils.Constant;
+import lt_web.utils.ValidationUtil;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/admin/user/add")
@@ -43,20 +46,42 @@ public class UserAddController extends HttpServlet {
         String username = trim(req.getParameter("username"));
         String password = req.getParameter("password");
         User user = readUser(req, username);
-        if (username.isBlank() || password == null || password.isBlank()) {
-            showForm(req, resp, user, "Tên đăng nhập và mật khẩu không được để trống.");
-            return;
+
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (username.isBlank()) {
+            errors.put("username", "Tên đăng nhập không được để trống.");
+        } else if (!ValidationUtil.isValidUsername(username)) {
+            errors.put("username", "Tên đăng nhập từ 3-50 ký tự, chỉ gồm chữ, số, '.', '_' hoặc '-'.");
         }
-        if (userService.checkExistUsername(username)) {
-            showForm(req, resp, user, "Tên đăng nhập đã tồn tại.");
-            return;
+        if (user.getFullName() == null || trim(req.getParameter("fullname")).isEmpty()) {
+            errors.put("fullname", "Họ và tên không được để trống.");
+        } else if (trim(req.getParameter("fullname")).length() < 2 || trim(req.getParameter("fullname")).length() > 100) {
+            errors.put("fullname", "Họ và tên phải từ 2 đến 100 ký tự.");
         }
-        if (userService.checkExistEmail(user.getEmail())) {
-            showForm(req, resp, user, "Email đã tồn tại.");
-            return;
+        if (user.getEmail() != null && !ValidationUtil.isValidEmail(user.getEmail())) {
+            errors.put("email", "Địa chỉ email không đúng định dạng.");
         }
-        if (userService.checkExistPhone(user.getPhone())) {
-            showForm(req, resp, user, "Số điện thoại đã tồn tại.");
+        if (user.getPhone() != null && !ValidationUtil.isValidPhone(user.getPhone())) {
+            errors.put("phone", "Số điện thoại phải gồm 9-15 chữ số hợp lệ.");
+        }
+        if (password == null || password.isBlank()) {
+            errors.put("password", "Mật khẩu không được để trống.");
+        } else if (!ValidationUtil.isValidPassword(password)) {
+            errors.put("password", "Mật khẩu phải từ 6 đến 100 ký tự.");
+        }
+
+        if (!errors.containsKey("username") && userService.checkExistUsername(username)) {
+            errors.put("username", "Tên đăng nhập đã tồn tại.");
+        }
+        if (!errors.containsKey("email") && user.getEmail() != null && userService.checkExistEmail(user.getEmail())) {
+            errors.put("email", "Email đã tồn tại.");
+        }
+        if (!errors.containsKey("phone") && user.getPhone() != null && userService.checkExistPhone(user.getPhone())) {
+            errors.put("phone", "Số điện thoại đã tồn tại.");
+        }
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showForm(req, resp, user, errors.values().iterator().next());
             return;
         }
 

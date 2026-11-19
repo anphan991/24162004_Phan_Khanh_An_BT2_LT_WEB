@@ -249,7 +249,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="page-container member-main">
     <div class="section-heading">

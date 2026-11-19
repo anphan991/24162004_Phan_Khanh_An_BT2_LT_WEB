@@ -10,11 +10,19 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Category")
 @NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c ORDER BY c.cateid ASC")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Category implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,15 +37,6 @@ public class Category implements Serializable {
     @Size(max = 255, message = "Tên ảnh không được vượt quá 255 ký tự.")
     @Column(name = "icons", length = 255)
     private String icon;
-
-    public Category() {
-    }
-
-    public Category(int cateid, String catename, String icon) {
-        this.cateid = cateid;
-        this.catename = catename;
-        this.icon = icon;
-    }
 
     public int getId() {
         return cateid;
@@ -85,13 +84,5 @@ public class Category implements Serializable {
 
     public void setCateName(String cateName) {
         this.catename = cateName;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
     }
 }

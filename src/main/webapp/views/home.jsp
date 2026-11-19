@@ -160,7 +160,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="page-container member-main">
     <c:if test="${param.forbidden == '1'}">

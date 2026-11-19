@@ -145,7 +145,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="page-container member-main">
     <div style="margin-bottom: 16px;">
@@ -256,7 +255,7 @@
                             </c:choose>
                             <span style="display:block;">
                                 <strong><c:out value="${rv.title}" /></strong>
-                                <span><c:out value="${rv.user != null ? rv.user.fullName : 'Thành viên'}" /> · ${rv.views} lượt xem</span>
+                                <span><c:out value="${rv.user != null ? rv.user.fullName : 'Thành viên'}" /> - ${rv.views} lượt xem</span>
                             </span>
                         </a>
                     </c:if>
@@ -301,7 +300,7 @@
             ctx.fillText(title.slice(0, 44), canvas.width / 2, 165);
             ctx.font = '14px monospace';
             ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('ShopMVC Video Preview · ' + sec + 's', canvas.width / 2, 200);
+            ctx.fillText('ShopMVC Video Preview - ' + sec + 's', canvas.width / 2, 200);
             requestAnimationFrame(render);
         }
 

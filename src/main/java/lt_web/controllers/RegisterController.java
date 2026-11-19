@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.entity.User;
 import lt_web.services.OtpService;
 import lt_web.services.UserService;
@@ -41,67 +43,98 @@ public class RegisterController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         req.setCharacterEncoding("UTF-8");
 
-        String username = req.getParameter("username");
+        String username = trim(req.getParameter("username"));
         String password = req.getParameter("password");
         String repassword = req.getParameter("repassword");
-        String email = req.getParameter("email");
-        String fullname = req.getParameter("fullname");
-        String phone = req.getParameter("phone");
+        String email = trim(req.getParameter("email"));
+        String fullname = trim(req.getParameter("fullname"));
+        String phone = trim(req.getParameter("phone"));
 
         preserveFormFields(req, username, fullname, email, phone);
 
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            showError(req, resp, "Tài khoản và mật khẩu không được để trống!");
-            return;
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (username.isEmpty()) {
+            errors.put("username", "Tên đăng nhập không được để trống.");
+        } else if (!ValidationUtil.isValidUsername(username)) {
+            errors.put("username", "Tên đăng nhập từ 3-50 ký tự, chỉ gồm chữ, số, '.', '_' hoặc '-'.");
         }
 
-        if (email == null || email.isBlank()) {
-            showError(req, resp, "Email không được để trống để nhận mã kích hoạt OTP!");
-            return;
+        if (fullname.isEmpty()) {
+            errors.put("fullname", "Họ và tên không được để trống.");
+        } else if (fullname.length() < 2 || fullname.length() > 100) {
+            errors.put("fullname", "Họ và tên phải từ 2 đến 100 ký tự.");
         }
 
-        if (repassword != null && !repassword.isBlank() && !password.equals(repassword)) {
-            showError(req, resp, "Mật khẩu nhập lại không khớp!");
-            return;
+        if (email.isEmpty()) {
+            errors.put("email", "Email không được để trống để nhận mã kích hoạt OTP.");
+        } else if (!ValidationUtil.isValidEmail(email)) {
+            errors.put("email", "Địa chỉ email không đúng định dạng.");
         }
 
-        User candidate = new User(email.trim(), username.trim(), fullname, password,
+        if (phone.isEmpty()) {
+            errors.put("phone", "Số điện thoại không được để trống.");
+        } else if (!ValidationUtil.isValidPhone(phone)) {
+            errors.put("phone", "Số điện thoại phải gồm 9-15 chữ số hợp lệ.");
+        }
+
+        if (password == null || password.isBlank()) {
+            errors.put("password", "Mật khẩu không được để trống.");
+        } else if (!ValidationUtil.isValidPassword(password)) {
+            errors.put("password", "Mật khẩu phải từ 6 đến 100 ký tự.");
+        }
+
+        if (repassword == null || repassword.isBlank()) {
+            errors.put("repassword", "Vui lòng nhập lại mật khẩu.");
+        } else if (password != null && !password.equals(repassword)) {
+            errors.put("repassword", "Mật khẩu nhập lại không khớp.");
+        }
+
+        User candidate = new User(email, username, fullname, password == null ? "" : password,
                 null, 5, phone, new Date(System.currentTimeMillis()));
-        String validationMessage = ValidationUtil.firstMessage(candidate);
-        if (validationMessage != null) {
-            showError(req, resp, validationMessage);
+        for (Map.Entry<String, String> entry : ValidationUtil.fieldErrors(candidate).entrySet()) {
+            String key = switch (entry.getKey()) {
+                case "userName" -> "username";
+                case "fullName" -> "fullname";
+                case "passWord" -> "password";
+                default -> entry.getKey();
+            };
+            errors.putIfAbsent(key, entry.getValue());
+        }
+
+        if (!errors.containsKey("email") && userService.checkExistEmail(email)) {
+            errors.put("email", "Email đã tồn tại trong hệ thống.");
+        }
+        if (!errors.containsKey("username") && userService.checkExistUsername(username)) {
+            errors.put("username", "Tên đăng nhập đã tồn tại.");
+        }
+        if (!errors.containsKey("phone") && userService.checkExistPhone(phone)) {
+            errors.put("phone", "Số điện thoại đã tồn tại.");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showError(req, resp, errors.values().iterator().next());
             return;
         }
 
-        if (userService.checkExistEmail(email.trim())) {
-            showError(req, resp, "Email đã tồn tại!");
-            return;
-        }
-
-        if (userService.checkExistUsername(username.trim())) {
-            showError(req, resp, "Tài khoản đã tồn tại!");
-            return;
-        }
-
-        if (userService.checkExistPhone(phone)) {
-            showError(req, resp, "Số điện thoại đã tồn tại!");
-            return;
-        }
-
-        boolean isSuccess = userService.register(username.trim(), password, email.trim(), fullname, phone);
+        boolean isSuccess = userService.register(username, password, email, fullname, phone);
         if (isSuccess) {
             try {
-                otpService.generateAndSendActivationOtp(email.trim(), fullname);
+                otpService.generateAndSendActivationOtp(email, fullname);
             } catch (Exception e) {
                 log("Không thể gửi email OTP kích hoạt", e);
             }
             HttpSession session = req.getSession(true);
-            session.setAttribute("activationEmail", email.trim());
-            String encodedEmail = URLEncoder.encode(email.trim(), StandardCharsets.UTF_8);
+            session.setAttribute("activationEmail", email);
+            String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
             resp.sendRedirect(req.getContextPath() + "/verify-otp?email=" + encodedEmail + "&type=activation");
         } else {
             showError(req, resp, "Lỗi hệ thống khi tạo tài khoản. Vui lòng thử lại!");
         }
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private void preserveFormFields(HttpServletRequest req, String username, String fullname, String email, String phone) {

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css">
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="auth-page">
     <section class="auth-card" aria-labelledby="login-title">
@@ -45,16 +44,18 @@
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/login" method="post">
+        <form id="loginForm" action="${pageContext.request.contextPath}/login" method="post" novalidate>
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
             <div class="field-group">
                 <label for="username">Tên đăng nhập</label>
-                <input id="username" class="input-control" type="text" name="username" value="<c:out value='${rememberedUsername}' />" placeholder="Nhập tên đăng nhập" required autocomplete="username">
+                <input id="username" class="input-control ${not empty errors.username ? 'is-invalid' : ''}" type="text" name="username" value="<c:out value='${rememberedUsername}' />" placeholder="Nhập tên đăng nhập" required maxlength="50" autocomplete="username">
+                <div class="invalid-feedback ${not empty errors.username ? 'd-block' : ''}"><c:out value="${errors.username}" /></div>
             </div>
 
             <div class="field-group">
                 <label for="password">Mật khẩu</label>
-                <input id="password" class="input-control" type="password" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                <input id="password" class="input-control ${not empty errors.password ? 'is-invalid' : ''}" type="password" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                <div class="invalid-feedback ${not empty errors.password ? 'd-block' : ''}"><c:out value="${errors.password}" /></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0 22px;">
@@ -75,5 +76,27 @@
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    window.ShopValidation.attach('loginForm', function (form) {
+        var valid = true;
+        var username = form.username.value.trim();
+        var password = form.password.value;
+        if (!username) {
+            window.ShopValidation.setError(form.username, 'Vui lòng nhập tên đăng nhập.');
+            valid = false;
+        } else if (username.length > 50) {
+            window.ShopValidation.setError(form.username, 'Tên đăng nhập không được vượt quá 50 ký tự.');
+            valid = false;
+        }
+        if (!password || !password.trim()) {
+            window.ShopValidation.setError(form.password, 'Vui lòng nhập mật khẩu.');
+            valid = false;
+        }
+        return valid;
+    });
+});
+</script>
 </body>
 </html>

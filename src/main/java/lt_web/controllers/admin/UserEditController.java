@@ -7,12 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.exceptions.DataAccessException;
 import lt_web.entity.User;
 import lt_web.services.UserService;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.utils.AdminAccess;
 import lt_web.utils.Constant;
+import lt_web.utils.ValidationUtil;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/admin/user/edit")
@@ -53,12 +56,32 @@ public class UserEditController extends HttpServlet {
 
         User user = readUser(req, existing);
         String password = req.getParameter("password");
-        if (userService.checkExistEmail(user.getEmail(), id)) {
-            showForm(req, resp, user, "Email đã tồn tại.");
-            return;
+        String fullname = trim(req.getParameter("fullname"));
+
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (fullname.isEmpty()) {
+            errors.put("fullname", "Họ và tên không được để trống.");
+        } else if (fullname.length() < 2 || fullname.length() > 100) {
+            errors.put("fullname", "Họ và tên phải từ 2 đến 100 ký tự.");
         }
-        if (userService.checkExistPhone(user.getPhone(), id)) {
-            showForm(req, resp, user, "Số điện thoại đã tồn tại.");
+        if (user.getEmail() != null && !ValidationUtil.isValidEmail(user.getEmail())) {
+            errors.put("email", "Địa chỉ email không đúng định dạng.");
+        }
+        if (user.getPhone() != null && !ValidationUtil.isValidPhone(user.getPhone())) {
+            errors.put("phone", "Số điện thoại phải gồm 9-15 chữ số hợp lệ.");
+        }
+        if (password != null && !password.isBlank() && !ValidationUtil.isValidPassword(password)) {
+            errors.put("password", "Mật khẩu mới phải từ 6 đến 100 ký tự.");
+        }
+        if (!errors.containsKey("email") && user.getEmail() != null && userService.checkExistEmail(user.getEmail(), id)) {
+            errors.put("email", "Email đã tồn tại.");
+        }
+        if (!errors.containsKey("phone") && user.getPhone() != null && userService.checkExistPhone(user.getPhone(), id)) {
+            errors.put("phone", "Số điện thoại đã tồn tại.");
+        }
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showForm(req, resp, user, errors.values().iterator().next());
             return;
         }
 

@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @SuppressWarnings("serial")
 @Entity
@@ -25,6 +28,9 @@ import java.util.regex.Pattern;
         name = "Video.findAll",
         query = "SELECT v FROM Video v LEFT JOIN FETCH v.user ORDER BY v.createdAt DESC, v.videoId DESC"
 )
+@Getter
+@Setter
+@NoArgsConstructor
 public class Video implements Serializable {
     private static final Pattern YOUTUBE_ID_PATTERN = Pattern.compile(
             "(?:youtube\\.com/(?:watch\\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\\.be/)([A-Za-z0-9_-]{11})"
@@ -67,9 +73,6 @@ public class Video implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Video() {
-    }
-
     public Video(String title, String poster, String videoPath, String description, User user) {
         this.title = title;
         this.poster = poster;
@@ -94,84 +97,12 @@ public class Video implements Serializable {
         this.user = user;
     }
 
-    public int getVideoId() {
-        return videoId;
-    }
-
-    public void setVideoId(int videoId) {
-        this.videoId = videoId;
-    }
-
     public int getId() {
         return videoId;
     }
 
     public void setId(int id) {
         this.videoId = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getPoster() {
-        return poster;
-    }
-
-    public void setPoster(String poster) {
-        this.poster = poster;
-    }
-
-    public String getVideoPath() {
-        return videoPath;
-    }
-
-    public void setVideoPath(String videoPath) {
-        this.videoPath = videoPath;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getViews() {
-        return views;
-    }
-
-    public void setViews(int views) {
-        this.views = views;
-    }
-
-    public int getActive() {
-        return active;
-    }
-
-    public void setActive(int active) {
-        this.active = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public boolean isExternalVideo() {

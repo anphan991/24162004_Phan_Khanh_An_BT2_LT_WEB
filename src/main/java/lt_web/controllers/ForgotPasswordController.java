@@ -9,12 +9,15 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.entity.User;
 import lt_web.services.OtpService;
 import lt_web.services.UserService;
 import lt_web.services.impl.OtpServiceImpl;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.utils.Constant;
+import lt_web.utils.ValidationUtil;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/forgot-password")
@@ -40,17 +43,26 @@ public class ForgotPasswordController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         String email = req.getParameter("email");
-        if (email == null || email.isBlank()) {
-            req.setAttribute("alert", "Vui lòng nhập email đã đăng ký.");
+        String normalizedEmail = email == null ? "" : email.trim();
+        req.setAttribute("email", normalizedEmail);
+
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (normalizedEmail.isEmpty()) {
+            errors.put("email", "Vui lòng nhập email đã đăng ký.");
+        } else if (!ValidationUtil.isValidEmail(normalizedEmail)) {
+            errors.put("email", "Địa chỉ email không đúng định dạng.");
+        }
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", errors.values().iterator().next());
             req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
             return;
         }
 
-        String normalizedEmail = email.trim();
-        req.setAttribute("email", normalizedEmail);
-
         User user = userService.findByEmail(normalizedEmail);
         if (user == null) {
+            errors.put("email", "Email không tồn tại trong hệ thống.");
+            req.setAttribute("errors", errors);
             req.setAttribute("alert", "Email không tồn tại trong hệ thống.");
             req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
             return;

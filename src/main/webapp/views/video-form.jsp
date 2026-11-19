@@ -56,7 +56,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="page-container member-main">
     <section class="video-form-card" aria-labelledby="video-form-title">
@@ -80,9 +79,9 @@
                 <c:param name="id" value="${video.videoId}" />
             </c:if>
         </c:url>
-        <form action="${formActionUrl}"
+        <form id="videoForm" data-mode="${formMode}" action="${formActionUrl}"
               method="post"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data" novalidate>
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
             <c:if test="${formMode == 'edit'}">
                 <input type="hidden" name="id" value="${video.videoId}">
@@ -90,21 +89,24 @@
 
             <div class="field-group">
                 <label for="title">Tiêu đề video *</label>
-                <input id="title" class="input-control" type="text" name="title"
+                <input id="title" class="input-control ${not empty errors.title ? 'is-invalid' : ''}" type="text" name="title"
                        value="<c:out value='${video.title}' />"
                        placeholder="Ví dụ: Hướng dẫn phối đồ công sở" required maxlength="255">
+                <div class="invalid-feedback ${not empty errors.title ? 'd-block' : ''}"><c:out value="${errors.title}" /></div>
             </div>
 
             <div class="field-group">
                 <label for="description">Mô tả chi tiết</label>
-                <textarea id="description" class="textarea-control" name="description"
+                <textarea id="description" class="textarea-control ${not empty errors.description ? 'is-invalid' : ''}" name="description"
                           maxlength="2000" placeholder="Nhập mô tả nội dung video..."><c:out value="${video.description}" /></textarea>
+                <div class="invalid-feedback ${not empty errors.description ? 'd-block' : ''}"><c:out value="${errors.description}" /></div>
             </div>
 
             <div class="form-grid">
                 <div class="field-group">
                     <label for="poster">Ảnh poster (JPG, PNG, SVG, WEBP)</label>
-                    <input id="poster" class="input-control" type="file" name="poster" accept="image/*" onchange="previewPosterFile(this)">
+                    <input id="poster" class="input-control ${not empty errors.poster ? 'is-invalid' : ''}" type="file" name="poster" accept="image/*" onchange="previewPosterFile(this)">
+                    <div class="invalid-feedback ${not empty errors.poster ? 'd-block' : ''}"><c:out value="${errors.poster}" /></div>
                     <c:choose>
                         <c:when test="${formMode == 'edit' && video.youtubeVideo && !video.customPoster}">
                             <div style="margin-top: 8px;">
@@ -128,8 +130,9 @@
                 </div>
 
                 <div class="field-group">
-                    <label for="videoFile">Tệp Video (MP4, WEBM, OGG, MOV · tối đa 100MB)</label>
-                    <input id="videoFile" class="input-control" type="file" name="videoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" onchange="previewVideoFile(this)">
+                    <label for="videoFile">Tệp Video (MP4, WEBM, OGG, MOV - tối đa 100MB)</label>
+                    <input id="videoFile" class="input-control ${not empty errors.videoFile ? 'is-invalid' : ''}" type="file" name="videoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" onchange="previewVideoFile(this)">
+                    <div class="invalid-feedback ${not empty errors.videoFile ? 'd-block' : ''}"><c:out value="${errors.videoFile}" /></div>
                     <c:if test="${formMode == 'edit' && not empty video.videoPath}">
                         <p class="demo-note" style="margin-top: 6px;">Video hiện tại: <strong><c:out value="${video.videoPath}" /></strong> (chọn tệp mới hoặc dán URL mới ở dưới để thay thế)</p>
                     </c:if>
@@ -154,10 +157,12 @@
 
             <div class="field-group">
                 <label for="videoUrl">Hoặc URL Video / YouTube (tùy chọn nếu không tải tệp từ máy)</label>
-                <input id="videoUrl" class="input-control" type="text" name="videoUrl"
+                <input id="videoUrl" class="input-control ${not empty errors.videoUrl ? 'is-invalid' : ''}" type="text" name="videoUrl"
                        value="<c:out value='${video.externalVideo ? video.videoPath : ""}' />"
                        placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
+                       maxlength="500"
                        oninput="previewYoutubeUrl(this)">
+                <div class="invalid-feedback ${not empty errors.videoUrl ? 'd-block' : ''}"><c:out value="${errors.videoUrl}" /></div>
             </div>
 
             <div class="field-group">
@@ -223,6 +228,61 @@ function previewYoutubeUrl(input) {
         img.style.display = 'block';
     }
 }
+document.addEventListener('DOMContentLoaded', function () {
+    window.ShopValidation.attach('videoForm', function (form) {
+        var valid = true;
+        var mode = form.getAttribute('data-mode');
+        var title = form.title.value.trim();
+        var desc = form.description.value;
+        var url = form.videoUrl.value.trim();
+        var hasPoster = form.poster.files && form.poster.files.length > 0;
+        var hasVideo = form.videoFile.files && form.videoFile.files.length > 0;
+
+        if (!title) {
+            window.ShopValidation.setError(form.title, 'Tiêu đề video không được để trống.');
+            valid = false;
+        } else if (title.length < 2 || title.length > 255) {
+            window.ShopValidation.setError(form.title, 'Tiêu đề video phải từ 2 đến 255 ký tự.');
+            valid = false;
+        }
+        if (desc.length > 2000) {
+            window.ShopValidation.setError(form.description, 'Mô tả không được vượt quá 2000 ký tự.');
+            valid = false;
+        }
+        if (hasPoster) {
+            var posterFile = form.poster.files[0];
+            if (!/\.(jpg|jpeg|png|gif|svg|webp)$/i.test(posterFile.name)) {
+                window.ShopValidation.setError(form.poster, 'Ảnh poster phải có định dạng JPG, PNG, SVG, GIF hoặc WEBP.');
+                valid = false;
+            } else if (posterFile.size > 5 * 1024 * 1024) {
+                window.ShopValidation.setError(form.poster, 'Ảnh poster tối đa 5MB.');
+                valid = false;
+            }
+        }
+        if (hasVideo) {
+            var videoFile = form.videoFile.files[0];
+            if (!/\.(mp4|webm|ogg|mov|mkv)$/i.test(videoFile.name)) {
+                window.ShopValidation.setError(form.videoFile, 'Video chỉ hỗ trợ MP4, WEBM, OGG, MOV hoặc MKV.');
+                valid = false;
+            } else if (videoFile.size > 100 * 1024 * 1024) {
+                window.ShopValidation.setError(form.videoFile, 'Tệp video tối đa 100MB.');
+                valid = false;
+            }
+        }
+        if (url) {
+            var normalized = /^(www\.|m\.|youtube\.com\/|youtu\.be\/)/i.test(url) ? ('https://' + url) : url;
+            if (!/^https?:\/\/.+/i.test(normalized) || normalized.length > 500) {
+                window.ShopValidation.setError(form.videoUrl, 'Đường dẫn video URL phải bắt đầu bằng http:// hoặc https://.');
+                valid = false;
+            }
+        }
+        if (mode !== 'edit' && !hasVideo && !url) {
+            window.ShopValidation.setError(form.videoFile, 'Vui lòng chọn tệp video tải lên hoặc nhập URL Video / YouTube.');
+            valid = false;
+        }
+        return valid;
+    });
+});
 </script>
 </body>
 </html>

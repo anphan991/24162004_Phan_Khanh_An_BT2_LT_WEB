@@ -9,12 +9,15 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.entity.OtpToken;
 import lt_web.services.OtpService;
 import lt_web.services.UserService;
 import lt_web.services.impl.OtpServiceImpl;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.utils.Constant;
+import lt_web.utils.ValidationUtil;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/verify-otp")
@@ -56,7 +59,10 @@ public class VerifyOtpController extends HttpServlet {
         req.setAttribute("email", email);
         req.setAttribute("type", type);
 
-        if (otpCode == null || otpCode.trim().length() != 6) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (!ValidationUtil.isValidOtp(otpCode)) {
+            errors.put("otp", "Mã OTP phải gồm đúng 6 chữ số.");
+            req.setAttribute("errors", errors);
             req.setAttribute("alert", "Mã OTP phải gồm 6 chữ số.");
             req.getRequestDispatcher(Constant.Path.VERIFY_OTP).forward(req, resp);
             return;

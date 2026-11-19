@@ -50,7 +50,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="auth-page">
     <section class="auth-card" aria-labelledby="otp-title">
@@ -81,16 +80,17 @@
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/verify-otp" method="post">
+        <form id="verifyOtpForm" action="${pageContext.request.contextPath}/verify-otp" method="post" novalidate>
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
             <input type="hidden" name="email" value="<c:out value='${email}' />">
             <input type="hidden" name="type" value="<c:out value='${type}' />">
 
             <div class="field-group">
                 <label for="otp">Mã OTP (6 chữ số)</label>
-                <input id="otp" class="input-control otp-input-field" type="text" name="otp"
+                <input id="otp" class="input-control otp-input-field ${not empty errors.otp ? 'is-invalid' : ''}" type="text" name="otp"
                        maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
                        placeholder="000000" required autofocus autocomplete="one-time-code">
+                <div class="invalid-feedback ${not empty errors.otp ? 'd-block' : ''}"><c:out value="${errors.otp}" /></div>
             </div>
 
             <p class="form-note">Mã OTP có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này.</p>
@@ -113,5 +113,18 @@
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    window.ShopValidation.attach('verifyOtpForm', function (form) {
+        var otp = form.otp.value.trim();
+        if (!/^[0-9]{6}$/.test(otp)) {
+            window.ShopValidation.setError(form.otp, 'Mã OTP phải gồm đúng 6 chữ số.');
+            return false;
+        }
+        return true;
+    });
+});
+</script>
 </body>
 </html>

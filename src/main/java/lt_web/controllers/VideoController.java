@@ -11,8 +11,10 @@ import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import lt_web.entity.User;
 import lt_web.entity.Video;
 import lt_web.exceptions.DataAccessException;
@@ -215,50 +217,78 @@ public class VideoController extends HttpServlet {
         video.setDescription(description);
         video.setActive(active);
         video.setUser(account);
+        video.setVideoPath(videoUrl);
 
-        String validationMessage = ValidationUtil.firstMessage(video);
-        if (validationMessage != null) {
-            video.setVideoPath(videoUrl);
-            showForm(req, resp, video, "add", validationMessage);
+        Map<String, String> errors = new LinkedHashMap<>(ValidationUtil.fieldErrors(video));
+        if (!errors.containsKey("title") && title.length() < 2) {
+            errors.put("title", "Tiêu đề video phải có ít nhất 2 ký tự.");
+        }
+        if (videoUrl != null && !ValidationUtil.isValidExternalUrl(videoUrl)) {
+            errors.put("videoUrl", "Đường dẫn video URL phải hợp lệ và bắt đầu bằng http:// hoặc https://.");
+        }
+
+        Part posterPart = null;
+        Part videoPart = null;
+        try {
+            posterPart = req.getPart("poster");
+            videoPart = firstNonEmptyPart(req, "videoFile", "multiPartServlet", "uploadFile");
+        } catch (IllegalStateException e) {
+            log("Tệp tải lên vượt quá dung lượng cho phép", e);
+            errors.put("videoFile", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            req.setAttribute("errors", errors);
+            showForm(req, resp, video, "add", errors.get("videoFile"));
+            return;
+        }
+
+        if (posterPart != null && posterPart.getSize() > 5L * 1024 * 1024) {
+            errors.put("poster", "Ảnh poster tối đa 5MB.");
+        }
+        if (videoPart != null && videoPart.getSize() > 100L * 1024 * 1024) {
+            errors.put("videoFile", "Tệp video tối đa 100MB.");
+        }
+        if ((videoPart == null || videoPart.getSize() == 0) && videoUrl == null) {
+            errors.put("videoFile", "Vui lòng chọn tệp video tải lên hoặc nhập URL Video / YouTube.");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showForm(req, resp, video, "add", errors.values().iterator().next());
             return;
         }
 
         String storedPoster = null;
         String storedVideo = null;
         try {
-            Part posterPart = req.getPart("poster");
             storedPoster = FileStorage.saveImage(posterPart);
             video.setPoster(storedPoster != null ? storedPoster : "default-video-poster.svg");
 
-            Part videoPart = firstNonEmptyPart(req, "videoFile", "multiPartServlet", "uploadFile");
             storedVideo = FileStorage.saveVideo(videoPart);
             if (storedVideo != null) {
                 video.setVideoPath(storedVideo);
-            } else if (videoUrl != null) {
-                if (!isValidExternalUrl(videoUrl)) {
-                    cleanupUploadedFiles(storedPoster, null);
-                    showForm(req, resp, video, "add", "Đường dẫn video URL phải bắt đầu bằng http:// hoặc https://.");
-                    return;
-                }
-                video.setVideoPath(videoUrl);
             } else {
-                video.setVideoPath("default-video.mp4");
+                video.setVideoPath(videoUrl);
             }
         } catch (IllegalStateException e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Tệp tải lên vượt quá dung lượng cho phép", e);
-            showForm(req, resp, video, "add", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            errors.put("videoFile", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            req.setAttribute("errors", errors);
+            showForm(req, resp, video, "add", errors.get("videoFile"));
             return;
         } catch (Exception e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Không thể lưu tệp upload cho video", e);
-            showForm(req, resp, video, "add", e.getMessage() != null ? e.getMessage() : "Không thể tải tệp lên.");
+            String msg = e.getMessage() != null ? e.getMessage() : "Không thể tải tệp lên.";
+            errors.put(storedPoster == null && posterPart != null && posterPart.getSize() > 0 ? "poster" : "videoFile", msg);
+            req.setAttribute("errors", errors);
+            showForm(req, resp, video, "add", msg);
             return;
         }
 
-        validationMessage = ValidationUtil.firstMessage(video);
+        String validationMessage = ValidationUtil.firstMessage(video);
         if (validationMessage != null) {
             cleanupUploadedFiles(storedPoster, storedVideo);
+            req.setAttribute("errors", ValidationUtil.fieldErrors(video));
             showForm(req, resp, video, "add", validationMessage);
             return;
         }
@@ -350,22 +380,47 @@ public class VideoController extends HttpServlet {
         draft.setDescription(description);
         draft.setActive(active);
         draft.setPoster(existing.getPoster());
-        draft.setVideoPath(existing.getVideoPath());
+        draft.setVideoPath(videoUrl != null ? videoUrl : existing.getVideoPath());
         draft.setUser(existing.getUser());
 
-        String validationMessage = ValidationUtil.firstMessage(draft);
-        if (validationMessage != null) {
-            showForm(req, resp, draft, "edit", validationMessage);
+        Map<String, String> errors = new LinkedHashMap<>(ValidationUtil.fieldErrors(draft));
+        if (!errors.containsKey("title") && title.length() < 2) {
+            errors.put("title", "Tiêu đề video phải có ít nhất 2 ký tự.");
+        }
+        if (videoUrl != null && !ValidationUtil.isValidExternalUrl(videoUrl)) {
+            errors.put("videoUrl", "Đường dẫn video URL phải hợp lệ và bắt đầu bằng http:// hoặc https://.");
+        }
+
+        Part posterPart = null;
+        Part videoPart = null;
+        try {
+            posterPart = req.getPart("poster");
+            videoPart = firstNonEmptyPart(req, "videoFile", "multiPartServlet", "uploadFile");
+        } catch (IllegalStateException e) {
+            log("Tệp tải lên vượt quá dung lượng cho phép", e);
+            errors.put("videoFile", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            req.setAttribute("errors", errors);
+            showForm(req, resp, draft, "edit", errors.get("videoFile"));
+            return;
+        }
+
+        if (posterPart != null && posterPart.getSize() > 5L * 1024 * 1024) {
+            errors.put("poster", "Ảnh poster tối đa 5MB.");
+        }
+        if (videoPart != null && videoPart.getSize() > 100L * 1024 * 1024) {
+            errors.put("videoFile", "Tệp video tối đa 100MB.");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showForm(req, resp, draft, "edit", errors.values().iterator().next());
             return;
         }
 
         String storedPoster = null;
         String storedVideo = null;
         try {
-            Part posterPart = req.getPart("poster");
             storedPoster = FileStorage.saveImage(posterPart);
-
-            Part videoPart = firstNonEmptyPart(req, "videoFile", "multiPartServlet", "uploadFile");
             storedVideo = FileStorage.saveVideo(videoPart);
 
             Video updated = new Video();
@@ -383,20 +438,16 @@ public class VideoController extends HttpServlet {
                     updated.setPoster("default-video-poster.svg");
                 }
             } else if (videoUrl != null && !videoUrl.equals(existing.getVideoPath())) {
-                if (!isValidExternalUrl(videoUrl)) {
-                    cleanupUploadedFiles(storedPoster, null);
-                    showForm(req, resp, draft, "edit", "Đường dẫn video URL phải bắt đầu bằng http:// hoặc https://.");
-                    return;
-                }
                 updated.setVideoPath(videoUrl);
                 if (storedPoster == null) {
                     updated.setPoster("default-video-poster.svg");
                 }
             }
 
-            validationMessage = ValidationUtil.firstMessage(updated);
+            String validationMessage = ValidationUtil.firstMessage(updated);
             if (validationMessage != null) {
                 cleanupUploadedFiles(storedPoster, storedVideo);
+                req.setAttribute("errors", ValidationUtil.fieldErrors(updated));
                 showForm(req, resp, draft, "edit", validationMessage);
                 return;
             }
@@ -406,7 +457,9 @@ public class VideoController extends HttpServlet {
         } catch (IllegalStateException e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Tệp tải lên vượt quá dung lượng cho phép", e);
-            showForm(req, resp, draft, "edit", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            errors.put("videoFile", "Dung lượng tệp tải lên vượt quá giới hạn cho phép (tối đa 100MB).");
+            req.setAttribute("errors", errors);
+            showForm(req, resp, draft, "edit", errors.get("videoFile"));
         } catch (DataAccessException e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Không thể cập nhật video", e);
@@ -414,7 +467,10 @@ public class VideoController extends HttpServlet {
         } catch (Exception e) {
             cleanupUploadedFiles(storedPoster, storedVideo);
             log("Lỗi khi xử lý tệp upload chỉnh sửa video", e);
-            showForm(req, resp, draft, "edit", e.getMessage() != null ? e.getMessage() : "Không thể xử lý tệp tải lên.");
+            String msg = e.getMessage() != null ? e.getMessage() : "Không thể xử lý tệp tải lên.";
+            errors.put(storedPoster == null && posterPart != null && posterPart.getSize() > 0 ? "poster" : "videoFile", msg);
+            req.setAttribute("errors", errors);
+            showForm(req, resp, draft, "edit", msg);
         }
     }
 

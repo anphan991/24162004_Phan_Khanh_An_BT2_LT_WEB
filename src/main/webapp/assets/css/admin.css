@@ -22,7 +22,7 @@ body.admin-page {
 a { color: inherit; }
 button, input { font: inherit; }
 
-.admin-shell { display: flex; min-height: 100vh; }
+.admin-shell { display: flex; flex: 1 0 auto; min-height: 0; }
 
 .admin-sidebar {
     width: 240px;

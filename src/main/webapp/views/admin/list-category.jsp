@@ -10,16 +10,9 @@
 </head>
 <body class="admin-page">
 <div class="admin-shell">
-    <jsp:include page="/views/admin/sidebar.jsp" />
+    <jsp:include page="/common/admin/left.jsp" />
 
     <div class="admin-workspace">
-        <header class="admin-header">
-            <h1>Quản lý hệ thống</h1>
-            <div class="admin-header-meta">
-                <span>Đăng nhập: <strong><c:out value="${sessionScope.account.userName}" /></strong></span>
-                <a class="admin-button admin-button-danger" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
-            </div>
-        </header>
 
         <main class="admin-main">
             <div class="admin-stats">
@@ -190,7 +183,7 @@
                                     <td class="admin-id">#<c:out value="${u.id}" /></td>
                                     <td><strong><c:out value="${u.userName}" /></strong></td>
                                     <td><c:out value="${u.fullName}" /></td>
-                                    <td class="admin-id"><c:out value="${not empty u.email ? u.email : '—'}" /><c:if test="${not empty u.phone}"> · <c:out value="${u.phone}" /></c:if></td>
+                                    <td class="admin-id"><c:out value="${not empty u.email ? u.email : '—'}" /><c:if test="${not empty u.phone}"> - <c:out value="${u.phone}" /></c:if></td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${u.roleid == 1}"><span class="admin-role">Admin</span></c:when>

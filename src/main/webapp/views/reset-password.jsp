@@ -27,7 +27,6 @@
     </style>
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="auth-page">
     <section class="auth-card" aria-labelledby="reset-title">
@@ -44,29 +43,32 @@
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/reset-password" method="post">
+        <form id="resetPasswordForm" action="${pageContext.request.contextPath}/reset-password" method="post" novalidate>
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
             <input type="hidden" name="email" value="<c:out value='${email}' />">
 
             <c:if test="${!isOtpVerified}">
                 <div class="field-group">
                     <label for="otp">Mã OTP (6 chữ số)</label>
-                    <input id="otp" class="input-control otp-input-field" type="text" name="otp"
+                    <input id="otp" class="input-control otp-input-field ${not empty errors.otp ? 'is-invalid' : ''}" type="text" name="otp"
                            maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
                            placeholder="000000" required autofocus autocomplete="one-time-code">
+                    <div class="invalid-feedback ${not empty errors.otp ? 'd-block' : ''}"><c:out value="${errors.otp}" /></div>
                 </div>
             </c:if>
 
             <div class="field-group">
                 <label for="password">Mật khẩu mới</label>
-                <input id="password" class="input-control" type="password" name="password"
-                       placeholder="Tối thiểu 3 ký tự" required autocomplete="new-password">
+                <input id="password" class="input-control ${not empty errors.password ? 'is-invalid' : ''}" type="password" name="password"
+                       placeholder="Tối thiểu 6 ký tự" required maxlength="100" autocomplete="new-password">
+                <div class="invalid-feedback ${not empty errors.password ? 'd-block' : ''}"><c:out value="${errors.password}" /></div>
             </div>
 
             <div class="field-group">
                 <label for="repassword">Nhập lại mật khẩu mới</label>
-                <input id="repassword" class="input-control" type="password" name="repassword"
-                       placeholder="Xác nhận mật khẩu mới" required autocomplete="new-password">
+                <input id="repassword" class="input-control ${not empty errors.repassword ? 'is-invalid' : ''}" type="password" name="repassword"
+                       placeholder="Xác nhận mật khẩu mới" required maxlength="100" autocomplete="new-password">
+                <div class="invalid-feedback ${not empty errors.repassword ? 'd-block' : ''}"><c:out value="${errors.repassword}" /></div>
             </div>
 
             <button class="button button-primary auth-submit" type="submit" style="margin-top: 14px;">Đặt lại mật khẩu</button>
@@ -77,5 +79,33 @@
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    window.ShopValidation.attach('resetPasswordForm', function (form) {
+        var valid = true;
+        if (form.otp) {
+            if (!/^[0-9]{6}$/.test(form.otp.value.trim())) {
+                window.ShopValidation.setError(form.otp, 'Vui lòng nhập mã OTP gồm đúng 6 chữ số.');
+                valid = false;
+            }
+        }
+        var password = form.password.value;
+        var repassword = form.repassword.value;
+        if (!password || password.length < 6 || password.length > 100) {
+            window.ShopValidation.setError(form.password, 'Mật khẩu mới phải từ 6 đến 100 ký tự.');
+            valid = false;
+        }
+        if (!repassword) {
+            window.ShopValidation.setError(form.repassword, 'Vui lòng nhập lại mật khẩu mới.');
+            valid = false;
+        } else if (password !== repassword) {
+            window.ShopValidation.setError(form.repassword, 'Mật khẩu xác nhận không khớp.');
+            valid = false;
+        }
+        return valid;
+    });
+});
+</script>
 </body>
 </html>

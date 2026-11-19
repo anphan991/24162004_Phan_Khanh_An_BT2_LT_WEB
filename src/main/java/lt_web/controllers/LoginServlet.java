@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.entity.User;
 import lt_web.services.RememberMeService;
 import lt_web.services.UserService;
@@ -55,19 +57,28 @@ public class LoginServlet extends HttpServlet {
         String password = req.getParameter("password");
         String remember = req.getParameter("remember");
         boolean isRememberMe = "on".equals(remember);
-        req.setAttribute("rememberedUsername", username == null ? "" : username.trim());
+        String trimmedUsername = username == null ? "" : username.trim();
+        req.setAttribute("rememberedUsername", trimmedUsername);
         req.setAttribute("remembered", isRememberMe);
 
-        String alertMsg = "";
-        if (username == null || password == null || username.isBlank() || password.isBlank()) {
-            alertMsg = "Tài khoản hoặc mật khẩu không được rỗng";
-            req.setAttribute("alert", alertMsg);
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (trimmedUsername.isEmpty()) {
+            errors.put("username", "Vui lòng nhập tên đăng nhập.");
+        } else if (trimmedUsername.length() > 50) {
+            errors.put("username", "Tên đăng nhập không được vượt quá 50 ký tự.");
+        }
+        if (password == null || password.isBlank()) {
+            errors.put("password", "Vui lòng nhập mật khẩu.");
+        }
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", errors.values().iterator().next());
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
             return;
         }
 
         UserService service = new UserServiceImpl();
-        User user = service.login(username.trim(), password);
+        User user = service.login(trimmedUsername, password);
         if (user != null) {
             if (user.getStatus() != null && user.getStatus() == 0) {
                 req.setAttribute("alert", "Tài khoản chưa được kích hoạt. Vui lòng kích hoạt qua mã OTP đã gửi tới email.");
@@ -83,8 +94,7 @@ public class LoginServlet extends HttpServlet {
             }
             resp.sendRedirect(req.getContextPath() + "/waiting");
         } else {
-            alertMsg = "Tài khoản hoặc mật khẩu không đúng";
-            req.setAttribute("alert", alertMsg);
+            req.setAttribute("alert", "Tài khoản hoặc mật khẩu không đúng");
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
         }
     }

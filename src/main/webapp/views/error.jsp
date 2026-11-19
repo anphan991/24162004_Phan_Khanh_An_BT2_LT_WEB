@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css">
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 <main class="error-page">
     <section class="error-card">
         <h1>Đăng nhập không thành công</h1>

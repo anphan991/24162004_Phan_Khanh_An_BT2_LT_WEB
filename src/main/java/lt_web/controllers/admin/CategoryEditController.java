@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lt_web.entity.Category;
 import lt_web.exceptions.DataAccessException;
 import lt_web.services.CategoryService;
@@ -84,9 +86,14 @@ public class CategoryEditController extends HttpServlet {
             return;
         }
 
-        String validationMessage = ValidationUtil.firstMessage(category);
-        if (validationMessage != null) {
-            showFormError(req, resp, cateold, validationMessage);
+        Category draft = new Category(cateold.getCateid(), category.getCatename(), cateold.getIcon());
+        Map<String, String> errors = new LinkedHashMap<>(ValidationUtil.fieldErrors(category));
+        if (!errors.containsKey("catename") && category.getCatename().length() < 2) {
+            errors.put("catename", "Tên danh mục phải có ít nhất 2 ký tự.");
+        }
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            showFormError(req, resp, draft, errors.values().iterator().next());
             return;
         }
 
@@ -94,19 +101,33 @@ public class CategoryEditController extends HttpServlet {
         String storedName = null;
         try {
             Part part = req.getPart("icon");
+            if (part != null && part.getSize() > 5L * 1024 * 1024) {
+                errors.put("icon", "Kích thước ảnh tối đa là 5MB.");
+                req.setAttribute("errors", errors);
+                showFormError(req, resp, draft, errors.get("icon"));
+                return;
+            }
             storedName = FileStorage.saveImage(part);
             category.setIcon(storedName == null ? fileold : storedName);
+        } catch (IllegalStateException e) {
+            log("Ảnh danh mục vượt dung lượng cho phép", e);
+            errors.put("icon", "Kích thước ảnh vượt quá giới hạn tối đa (5MB).");
+            req.setAttribute("errors", errors);
+            showFormError(req, resp, draft, errors.get("icon"));
+            return;
         } catch (Exception e) {
             log("Không thể lưu ảnh danh mục", e);
-            showFormError(req, resp, cateold,
-                    "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
+            errors.put("icon", "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
+            req.setAttribute("errors", errors);
+            showFormError(req, resp, draft, errors.get("icon"));
             return;
         }
 
-        validationMessage = ValidationUtil.firstMessage(category);
+        String validationMessage = ValidationUtil.firstMessage(category);
         if (validationMessage != null) {
             FileStorage.deleteQuietly(storedName);
-            showFormError(req, resp, cateold, validationMessage);
+            req.setAttribute("errors", ValidationUtil.fieldErrors(category));
+            showFormError(req, resp, draft, validationMessage);
             return;
         }
 
@@ -116,7 +137,7 @@ public class CategoryEditController extends HttpServlet {
         } catch (DataAccessException | IllegalStateException e) {
             FileStorage.deleteQuietly(storedName);
             log("Không thể cập nhật danh mục", e);
-            showFormError(req, resp, cateold, "Không thể cập nhật danh mục. Vui lòng thử lại.");
+            showFormError(req, resp, draft, "Không thể cập nhật danh mục. Vui lòng thử lại.");
         }
     }
 

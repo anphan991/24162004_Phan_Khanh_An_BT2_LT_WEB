@@ -152,7 +152,7 @@ button, input { font: inherit; }
 }
 
 .home-hero {
-    min-height: calc(100vh - 68px);
+    min-height: 0;
     display: flex;
     align-items: center;
     color: #fff;
@@ -160,12 +160,16 @@ button, input { font: inherit; }
     border-bottom: 1px solid #263653;
 }
 
+.landing-page .home-hero {
+    flex: 1 0 auto;
+}
+
 .landing-page { background: #17243a; }
 
 .home-hero-inner {
     width: min(1120px, calc(100% - 48px));
     margin: 0 auto;
-    padding: 84px 0 78px;
+    padding: 44px 0;
 }
 
 .eyebrow {
@@ -343,11 +347,11 @@ button, input { font: inherit; }
     .member-intro { align-items: flex-start; flex-direction: column; padding: 22px; }
 }
 
-.auth-page { min-height: calc(100vh - 68px); padding: 52px 20px 72px; }
+.auth-page { flex: 1 0 auto; min-height: 0; display: flex; flex-direction: column; padding: 28px 20px; }
 
 .auth-card {
     width: min(100%, 450px);
-    margin: 0 auto;
+    margin: auto;
     padding: 34px;
     background: #fff;
     border: 1px solid var(--line);
@@ -425,8 +429,8 @@ button, input { font: inherit; }
     .topbar-actions .button { padding: 0 11px; }
     .page-container,
     .home-hero-inner { width: min(100% - 32px, 1120px); }
-    .home-hero { min-height: calc(100vh - 58px); }
-    .home-hero-inner { padding: 60px 0 56px; }
+    .home-hero { min-height: 0; }
+    .home-hero-inner { padding: 36px 0; }
     .catalog-section { padding: 38px 0 56px; }
     .section-heading { align-items: stretch; flex-direction: column; gap: 16px; }
     .search-form input { flex: 1; width: auto; }

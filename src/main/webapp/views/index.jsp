@@ -160,12 +160,11 @@
     </style>
 </head>
 <body class="${empty sessionScope.account ? 'landing-page' : ''}">
-<jsp:include page="/views/topbar.jsp" />
 
 <section class="home-hero">
     <div class="home-hero-inner">
         <span class="eyebrow">Danh mục sản phẩm</span>
-        <h1>Mọi danh mục cần thiết, ở đúng một nơi.</h1>
+        <h1>Bài tập lập trình Web.</h1>
         <p>
             <c:choose>
                 <c:when test="${empty sessionScope.account}">Đăng nhập để xem danh mục sản phẩm và tiếp tục làm việc.</c:when>

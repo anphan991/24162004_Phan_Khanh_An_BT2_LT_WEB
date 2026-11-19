@@ -10,15 +10,8 @@
 </head>
 <body class="admin-page">
 <div class="admin-shell">
-    <jsp:include page="/views/admin/sidebar.jsp" />
+    <jsp:include page="/common/admin/left.jsp" />
     <div class="admin-workspace">
-        <header class="admin-header">
-            <h1>Quản lý hệ thống</h1>
-            <div class="admin-header-meta">
-                <span>Đăng nhập: <strong><c:out value="${sessionScope.account.userName}" /></strong></span>
-                <a class="admin-button admin-button-danger" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
-            </div>
-        </header>
 
         <main class="admin-form-container">
             <section class="admin-form-card">

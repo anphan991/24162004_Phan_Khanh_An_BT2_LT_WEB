@@ -9,6 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @SuppressWarnings("serial")
 @Entity
@@ -17,6 +20,9 @@ import jakarta.persistence.Table;
         name = "OtpToken.findLatestValid",
         query = "SELECT o FROM OtpToken o WHERE LOWER(TRIM(o.email)) = :email AND o.otpType = :otpType AND o.used = false AND o.expiresAt > :now ORDER BY o.createdAt DESC"
 )
+@Getter
+@Setter
+@NoArgsConstructor
 public class OtpToken implements Serializable {
     public static final String TYPE_ACTIVATION = "ACTIVATION";
     public static final String TYPE_FORGOT_PASSWORD = "FORGOT_PASSWORD";
@@ -44,9 +50,6 @@ public class OtpToken implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public OtpToken() {
-    }
-
     public OtpToken(String email, String otpCode, String otpType, LocalDateTime expiresAt) {
         this.email = email;
         this.otpCode = otpCode;
@@ -54,62 +57,6 @@ public class OtpToken implements Serializable {
         this.expiresAt = expiresAt;
         this.used = false;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getOtpCode() {
-        return otpCode;
-    }
-
-    public void setOtpCode(String otpCode) {
-        this.otpCode = otpCode;
-    }
-
-    public String getOtpType() {
-        return otpType;
-    }
-
-    public void setOtpType(String otpType) {
-        this.otpType = otpType;
-    }
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
-
-    public boolean isUsed() {
-        return used;
-    }
-
-    public void setUsed(boolean used) {
-        this.used = used;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public boolean isExpired() {

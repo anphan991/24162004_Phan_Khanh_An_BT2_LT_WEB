@@ -15,11 +15,17 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "users")
 @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u ORDER BY u.id ASC")
+@Getter
+@Setter
+@NoArgsConstructor
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,9 +70,6 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Video> videos;
 
-    public User() {
-    }
-
     public User(String email, String userName, String fullName, String passWord,
                 String avatar, int roleid, String phone, Date createdDate) {
         this.email = email;
@@ -90,22 +93,6 @@ public class User implements Serializable {
         this.roleid = roleid;
         this.phone = phone;
         this.createdDate = createdDate;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getUserName() {
@@ -156,14 +143,6 @@ public class User implements Serializable {
         this.passWord = password;
     }
 
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
     public int getRoleid() {
         return roleid == null ? 5 : roleid;
     }
@@ -172,39 +151,11 @@ public class User implements Serializable {
         this.roleid = roleid;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
     public Integer getStatus() {
         return status == null ? 1 : status;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
     public boolean isActive() {
         return getStatus() == 1;
-    }
-
-    public List<Video> getVideos() {
-        return videos;
-    }
-
-    public void setVideos(List<Video> videos) {
-        this.videos = videos;
     }
 }

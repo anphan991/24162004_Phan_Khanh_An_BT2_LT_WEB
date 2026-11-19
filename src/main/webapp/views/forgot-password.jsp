@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css">
 </head>
 <body>
-<jsp:include page="/views/topbar.jsp" />
 
 <main class="auth-page">
     <section class="auth-card" aria-labelledby="forgot-title">
@@ -22,12 +21,13 @@
             <div class="alert alert-danger"><c:out value="${alert}" /></div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/forgot-password" method="post">
+        <form id="forgotForm" action="${pageContext.request.contextPath}/forgot-password" method="post" novalidate>
             <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
             <div class="field-group">
                 <label for="email">Email đăng ký</label>
-                <input id="email" class="input-control" type="email" name="email"
-                       value="<c:out value='${email}' />" placeholder="email@domain.com" required autofocus autocomplete="email">
+                <input id="email" class="input-control ${not empty errors.email ? 'is-invalid' : ''}" type="email" name="email"
+                       value="<c:out value='${email}' />" placeholder="email@domain.com" required maxlength="100" autofocus autocomplete="email">
+                <div class="invalid-feedback ${not empty errors.email ? 'd-block' : ''}"><c:out value="${errors.email}" /></div>
             </div>
 
             <p class="form-note">Hệ thống sẽ gửi mã xác thực OTP 6 chữ số tới email của bạn (hiệu lực 5 phút).</p>
@@ -40,5 +40,22 @@
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    window.ShopValidation.attach('forgotForm', function (form) {
+        var email = form.email.value.trim();
+        if (!email) {
+            window.ShopValidation.setError(form.email, 'Vui lòng nhập email đã đăng ký.');
+            return false;
+        }
+        if (!/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+            window.ShopValidation.setError(form.email, 'Địa chỉ email không đúng định dạng.');
+            return false;
+        }
+        return true;
+    });
+});
+</script>
 </body>
 </html>
