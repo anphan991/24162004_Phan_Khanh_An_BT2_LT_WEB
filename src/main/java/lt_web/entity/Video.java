@@ -132,6 +132,10 @@ public class Video implements Serializable {
         return poster != null && !poster.isBlank() && !"default-video-poster.svg".equals(poster);
     }
 
+    public boolean isExternalPoster() {
+        return poster != null && (poster.startsWith("http://") || poster.startsWith("https://"));
+    }
+
     public String getYoutubeThumbnailUrl() {
         if (videoPath == null || videoPath.isBlank()) {
             return null;

@@ -24,6 +24,14 @@ public final class FileStorage {
         return savePart(part, VIDEO_EXTENSIONS, "Định dạng video không được hỗ trợ (hỗ trợ MP4, WEBM, OGG, MOV, MKV).");
     }
 
+    public static boolean isAllowedImage(String fileName) {
+        return fileName != null && IMAGE_EXTENSIONS.contains(extensionOf(fileName));
+    }
+
+    public static boolean isAllowedVideo(String fileName) {
+        return fileName != null && VIDEO_EXTENSIONS.contains(extensionOf(fileName));
+    }
+
     public static String getFileName(Part part) {
         if (part == null) {
             return null;

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chỉnh sửa danh mục - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=20261119-v3">
 </head>
 <body class="admin-page">
 <div class="admin-shell">
@@ -44,7 +44,7 @@
                                 <c:param name="fname" value="${category.icon}" />
                             </c:url>
                             <div class="admin-current-image">
-                                <img id="previewImg" src="${imgUrl}" alt="<c:out value='${category.name}' />">
+                                <img id="previewImg" src="${category.externalIcon ? category.icon : imgUrl}" alt="<c:out value='${category.name}' />">
                                 <div>
                                     <p>Chọn ảnh mới nếu muốn thay đổi. Bỏ trống để giữ ảnh hiện tại.</p>
                                     <input id="icon" class="${not empty errors.icon ? 'is-invalid' : ''}" type="file" name="icon" accept="image/*" onchange="previewEdit(this)">

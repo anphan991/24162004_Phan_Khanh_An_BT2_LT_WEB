@@ -26,6 +26,7 @@ import lombok.Setter;
 public class OtpToken implements Serializable {
     public static final String TYPE_ACTIVATION = "ACTIVATION";
     public static final String TYPE_FORGOT_PASSWORD = "FORGOT_PASSWORD";
+    public static final String TYPE_EMAIL_CHANGE = "EMAIL_CHANGE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

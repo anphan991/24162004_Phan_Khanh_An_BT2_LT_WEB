@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${formMode == 'edit' ? 'Cập nhật Video' : 'Thêm Video mới'} - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261116-v2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v3">
     <style>
         .video-form-card {
             max-width: 760px;
@@ -118,7 +118,7 @@
                                 <c:param name="fname" value="${video.poster}" />
                             </c:url>
                             <div style="margin-top: 8px;">
-                                <img id="posterPreview" src="${currentPosterUrl}" alt="Xem trước poster" style="width: 160px; height: 90px; object-fit: cover; border: 1px solid #cbd5e1; border-radius: 6px; display: block;">
+                                <img id="posterPreview" src="${video.externalPoster ? video.poster : currentPosterUrl}" alt="Xem trước poster" style="width: 160px; height: 90px; object-fit: cover; border: 1px solid #cbd5e1; border-radius: 6px; display: block;">
                             </div>
                         </c:when>
                         <c:otherwise>
@@ -136,14 +136,14 @@
                     <c:if test="${formMode == 'edit' && not empty video.videoPath}">
                         <p class="demo-note" style="margin-top: 6px;">Video hiện tại: <strong><c:out value="${video.videoPath}" /></strong> (chọn tệp mới hoặc dán URL mới ở dưới để thay thế)</p>
                     </c:if>
-                    <div id="videoPreviewWrap" style="margin-top: 8px; display: ${formMode == 'edit' && !video.sampleVideo && !video.externalVideo ? 'block' : 'none'};">
+                    <div id="videoPreviewWrap" style="margin-top: 8px; display: ${formMode == 'edit' && !video.sampleVideo && !video.youtubeVideo ? 'block' : 'none'};">
                         <c:choose>
-                            <c:when test="${formMode == 'edit' && !video.sampleVideo && !video.externalVideo}">
+                            <c:when test="${formMode == 'edit' && !video.sampleVideo && !video.youtubeVideo}">
                                 <c:url value="/video-file" var="currentVideoSrc">
                                     <c:param name="fname" value="${video.videoPath}" />
                                 </c:url>
                                 <video id="videoPreview" controls preload="metadata"
-                                       src="${currentVideoSrc}"
+                                       src="${video.externalVideo ? video.videoPath : currentVideoSrc}"
                                        style="width: 100%; max-width: 280px; aspect-ratio: 16 / 9; background: #0f172a; border-radius: 6px; display: block;"></video>
                             </c:when>
                             <c:otherwise>

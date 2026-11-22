@@ -13,6 +13,8 @@ public interface UserService {
     boolean resetPassword(String email, String rawPassword);
     boolean create(User user, String rawPassword);
     boolean update(User user, String rawPassword);
+    User updateProfile(int userId, String fullName, String phone, String avatar);
+    User updateEmail(int userId, String newEmail);
     void delete(int id);
     int migrateLegacyPasswords();
     boolean checkExistEmail(String email);

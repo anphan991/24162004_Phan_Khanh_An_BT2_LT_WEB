@@ -50,6 +50,26 @@ class UserServiceImplTest {
         assertNotNull(service.login("user_otp", "newpass123"));
     }
 
+    @Test
+    void updateProfileAndEmailPreserveCredentials() {
+        InMemoryUserRepository repo = new InMemoryUserRepository();
+        UserServiceImpl service = new UserServiceImpl(repo);
+
+        service.register("profile_user", "secret123", "old@example.com", "Old Name", "0901111222");
+        User updated = service.updateProfile(1, "New Name", "0988777666", "https://res.cloudinary.com/demo/image/upload/v1/avatar.png");
+
+        assertNotNull(updated);
+        assertTrue("New Name".equals(updated.getFullName()));
+        assertTrue("0988777666".equals(updated.getPhone()));
+        assertTrue("https://res.cloudinary.com/demo/image/upload/v1/avatar.png".equals(updated.getAvatar()));
+        assertTrue("old@example.com".equals(updated.getEmail()));
+
+        User afterEmail = service.updateEmail(1, "  NEW@Example.com ");
+        assertNotNull(afterEmail);
+        assertTrue("new@example.com".equals(afterEmail.getEmail()));
+        assertNotNull(service.login("profile_user", "secret123"));
+    }
+
     private static final class InMemoryUserRepository implements IUserRepository {
         private User user;
 
@@ -92,6 +112,28 @@ class UserServiceImplTest {
         @Override
         public void update(User value) {
             user = value;
+        }
+
+        @Override
+        public User updateProfile(int userId, String fullName, String phone, String avatar) {
+            if (user == null || user.getId() != userId) {
+                return null;
+            }
+            user.setFullName(fullName);
+            user.setPhone(phone);
+            if (avatar != null && !avatar.isBlank()) {
+                user.setAvatar(avatar);
+            }
+            return user;
+        }
+
+        @Override
+        public User updateEmail(int userId, String newEmail) {
+            if (user == null || user.getId() != userId) {
+                return null;
+            }
+            user.setEmail(newEmail);
+            return user;
         }
 
         @Override

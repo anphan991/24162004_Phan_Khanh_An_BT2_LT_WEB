@@ -15,7 +15,7 @@ import lt_web.services.UserService;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.utils.Constant;
 
-@WebFilter(urlPatterns = {"/admin/*", "/admin", "/manager/*", "/home", "/video", "/video/*", "/video-file"})
+@WebFilter(urlPatterns = {"/admin/*", "/admin", "/manager/*", "/home", "/profile", "/video", "/video/*", "/video-file"})
 public class AuthorizationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -78,6 +78,10 @@ public class Category implements Serializable {
         this.catename = catename;
     }
 
+    public boolean isExternalIcon() {
+        return icon != null && (icon.startsWith("http://") || icon.startsWith("https://"));
+    }
+
     public String getCateName() {
         return catename;
     }

@@ -22,6 +22,7 @@ import lt_web.services.UserService;
 import lt_web.services.VideoService;
 import lt_web.services.impl.UserServiceImpl;
 import lt_web.services.impl.VideoServiceImpl;
+import lt_web.utils.CloudinaryService;
 import lt_web.utils.Constant;
 import lt_web.utils.FileStorage;
 import lt_web.utils.ValidationUtil;
@@ -48,6 +49,7 @@ public class VideoController extends HttpServlet {
 
     private final VideoService videoService = new VideoServiceImpl();
     private final UserService userService = new UserServiceImpl();
+    private final CloudinaryService cloudinaryService = new CloudinaryService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -259,10 +261,10 @@ public class VideoController extends HttpServlet {
         String storedPoster = null;
         String storedVideo = null;
         try {
-            storedPoster = FileStorage.saveImage(posterPart);
+            storedPoster = cloudinaryService.saveImageWithCloudFallback(posterPart, "shopmvc/posters", 255);
             video.setPoster(storedPoster != null ? storedPoster : "default-video-poster.svg");
 
-            storedVideo = FileStorage.saveVideo(videoPart);
+            storedVideo = cloudinaryService.saveVideoWithCloudFallback(videoPart, "shopmvc/videos", 500);
             if (storedVideo != null) {
                 video.setVideoPath(storedVideo);
             } else {
@@ -420,8 +422,8 @@ public class VideoController extends HttpServlet {
         String storedPoster = null;
         String storedVideo = null;
         try {
-            storedPoster = FileStorage.saveImage(posterPart);
-            storedVideo = FileStorage.saveVideo(videoPart);
+            storedPoster = cloudinaryService.saveImageWithCloudFallback(posterPart, "shopmvc/posters", 255);
+            storedVideo = cloudinaryService.saveVideoWithCloudFallback(videoPart, "shopmvc/videos", 500);
 
             Video updated = new Video();
             updated.setVideoId(existing.getVideoId());

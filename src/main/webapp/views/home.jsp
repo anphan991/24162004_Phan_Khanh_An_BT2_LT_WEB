@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Danh mục - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261116-v2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v5">
     <style>
         .video-section {
             margin-top: 48px;
@@ -169,7 +169,24 @@
     <section class="member-intro" aria-labelledby="member-title">
         <div class="member-intro-content">
             <div class="avatar member-avatar">
-                <c:out value="${not empty sessionScope.account ? sessionScope.account.userName.substring(0, 1) : 'U'}" />
+                <c:choose>
+                    <c:when test="${not empty sessionScope.account.avatar}">
+                        <c:choose>
+                            <c:when test="${sessionScope.account.avatar.startsWith('http://') || sessionScope.account.avatar.startsWith('https://')}">
+                                <img src="<c:out value='${sessionScope.account.avatar}' />" alt="Avatar">
+                            </c:when>
+                            <c:otherwise>
+                                <c:url value="/image" var="memberAvatarUrl">
+                                    <c:param name="fname" value="${sessionScope.account.avatar}" />
+                                </c:url>
+                                <img src="${memberAvatarUrl}" alt="Avatar">
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <c:out value="${not empty sessionScope.account ? sessionScope.account.userName.substring(0, 1) : 'U'}" />
+                    </c:otherwise>
+                </c:choose>
             </div>
             <div>
                 <h1 id="member-title">Xin chào, <c:out value="${not empty sessionScope.account ? sessionScope.account.fullName : sessionScope.username}" /></h1>
@@ -183,13 +200,23 @@
                             <c:otherwise>Thành viên</c:otherwise>
                         </c:choose>
                     </span>
+                    <c:if test="${not empty sessionScope.account.email}">
+                        <span><strong>Email:</strong> <c:out value="${sessionScope.account.email}" /></span>
+                    </c:if>
                 </div>
             </div>
         </div>
 
-        <c:if test="${sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2}">
-            <a class="button button-primary" href="${pageContext.request.contextPath}/admin/category/list">Mở trang quản trị</a>
-        </c:if>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="button button-secondary" href="${pageContext.request.contextPath}/profile">
+                <i class="bi bi-person-gear"></i> Cập nhật hồ sơ
+            </a>
+            <c:if test="${sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2}">
+                <a class="button button-primary" href="${pageContext.request.contextPath}/admin/category/list">
+                    <i class="bi bi-speedometer2"></i> Mở trang quản trị
+                </a>
+            </c:if>
+        </div>
     </section>
 
     <section aria-labelledby="catalog-title">
@@ -220,91 +247,10 @@
                         </c:url>
                         <article class="catalog-card">
                             <div class="catalog-image">
-                                <img src="${imgUrl}" alt="<c:out value='${cate.catename}' />">
+                                <img src="${cate.externalIcon ? cate.icon : imgUrl}" alt="<c:out value='${cate.catename}' />">
                             </div>
                             <div class="catalog-card-body">
                                 <h3><c:out value="${cate.catename}" /></h3>
-                            </div>
-                        </article>
-                    </c:forEach>
-                </div>
-            </c:otherwise>
-        </c:choose>
-    </section>
-
-    <section class="video-section" aria-labelledby="latest-videos-title">
-        <div class="section-heading member-catalog-heading">
-            <div>
-                <h2 id="latest-videos-title">10 Video mới nhất</h2>
-                <p>Bấm vào tiêu đề video để xem chi tiết và phát video</p>
-            </div>
-            <a class="button button-primary" href="${pageContext.request.contextPath}/video">Xem tất cả video (6 video/trang)</a>
-        </div>
-
-        <c:if test="${not empty videoDbError}">
-            <div class="member-alert"><c:out value="${videoDbError}" /></div>
-        </c:if>
-
-        <c:choose>
-            <c:when test="${empty latestVideos}">
-                <div class="empty-state">Chưa có video nào được đăng tải.</div>
-            </c:when>
-            <c:otherwise>
-                <div class="video-grid">
-                    <c:forEach items="${latestVideos}" var="v">
-                        <c:url value="/video/detail" var="detailUrl">
-                            <c:param name="id" value="${v.videoId}" />
-                        </c:url>
-                        <c:url value="/video/edit" var="editUrl">
-                            <c:param name="id" value="${v.videoId}" />
-                        </c:url>
-                        <article class="video-card">
-                            <a class="video-thumb" href="${detailUrl}">
-                                <c:choose>
-                                    <c:when test="${v.customPoster}">
-                                        <c:url value="/image" var="posterUrl">
-                                            <c:param name="fname" value="${v.poster}" />
-                                        </c:url>
-                                        <img src="${posterUrl}" alt="<c:out value='${v.title}' />">
-                                    </c:when>
-                                    <c:when test="${v.youtubeVideo}">
-                                        <img src="${v.youtubeThumbnailUrl}" alt="<c:out value='${v.title}' />">
-                                    </c:when>
-                                    <c:when test="${!v.sampleVideo && !v.externalVideo}">
-                                        <c:url value="/video-file" var="thumbVideoUrl">
-                                            <c:param name="fname" value="${v.videoPath}" />
-                                        </c:url>
-                                        <video src="${thumbVideoUrl}#t=0.5" preload="metadata" muted playsinline></video>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:url value="/image" var="posterUrl">
-                                            <c:param name="fname" value="${not empty v.poster ? v.poster : 'default-video-poster.svg'}" />
-                                        </c:url>
-                                        <img src="${posterUrl}" alt="<c:out value='${v.title}' />">
-                                    </c:otherwise>
-                                </c:choose>
-                                <span class="video-badge-views">${v.views} lượt xem</span>
-                            </a>
-                            <div class="video-card-body">
-                                <a class="video-title-link" href="${detailUrl}"><c:out value="${v.title}" /></a>
-                                <div class="video-meta">
-                                    <span>Đăng bởi: <strong><c:out value="${v.user != null ? v.user.fullName : 'Thành viên'}" /></strong></span>
-                                    <span><c:out value="${v.formattedCreatedAt}" /></span>
-                                </div>
-                                <c:if test="${not empty v.description}">
-                                    <p class="video-desc"><c:out value="${v.description}" /></p>
-                                </c:if>
-                                <div class="video-card-actions">
-                                    <a class="video-btn-sm primary" href="${detailUrl}">Phát video</a>
-                                    <c:if test="${not empty sessionScope.account && (sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2 || (v.user != null && v.user.id == sessionScope.account.id))}">
-                                        <a class="video-btn-sm" href="${editUrl}">Sửa / Đổi video</a>
-                                        <form class="video-inline-form" action="${pageContext.request.contextPath}/video/delete" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa video này không?');">
-                                            <input type="hidden" name="csrfToken" value="<c:out value='${sessionScope.csrfToken}' />">
-                                            <input type="hidden" name="id" value="${v.videoId}">
-                                            <button class="video-btn-sm danger" type="submit">Xóa</button>
-                                        </form>
-                                    </c:if>
-                                </div>
                             </div>
                         </article>
                     </c:forEach>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng nhập thất bại - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v3">
 </head>
 <body>
 <main class="error-page">

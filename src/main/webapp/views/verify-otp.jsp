@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Xác thực mã OTP - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v3">
     <style>
         .otp-input-field {
             text-align: center;

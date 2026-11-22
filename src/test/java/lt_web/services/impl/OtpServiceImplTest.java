@@ -80,6 +80,17 @@ class OtpServiceImplTest {
     }
 
     @Test
+    void emailChangeOtpFlow() {
+        String code = otpService.generateAndSendEmailChangeOtp("newmail@example.com", "User Profile");
+
+        assertNotNull(code);
+        assertEquals(6, code.length());
+        assertEquals("newmail@example.com", emailService.lastToEmail);
+        assertTrue(otpService.verifyEmailChangeOtp("newmail@example.com", code));
+        assertFalse(otpService.verifyEmailChangeOtp("newmail@example.com", code));
+    }
+
+    @Test
     void expiredOtpIsRejected() {
         OtpToken expiredToken = new OtpToken("expired@example.com", "999999", OtpToken.TYPE_ACTIVATION,
                 LocalDateTime.now().minusMinutes(1));
@@ -160,6 +171,13 @@ class OtpServiceImplTest {
 
         @Override
         public boolean sendForgotPasswordOtp(String toEmail, String fullName, String otpCode) {
+            this.sent = true;
+            this.lastToEmail = toEmail;
+            return true;
+        }
+
+        @Override
+        public boolean sendEmailChangeOtp(String toEmail, String fullName, String otpCode) {
             this.sent = true;
             this.lastToEmail = toEmail;
             return true;

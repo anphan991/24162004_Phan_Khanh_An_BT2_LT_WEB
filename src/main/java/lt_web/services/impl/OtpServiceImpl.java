@@ -60,6 +60,23 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
+    public String generateAndSendEmailChangeOtp(String newEmail, String fullName) {
+        if (newEmail == null || newEmail.isBlank()) {
+            return null;
+        }
+        String normalizedEmail = newEmail.trim().toLowerCase(Locale.ROOT);
+        String code = generateNumericOtp(6);
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(EXPIRY_MINUTES);
+
+        otpRepo.invalidatePrevious(normalizedEmail, OtpToken.TYPE_EMAIL_CHANGE);
+        OtpToken token = new OtpToken(normalizedEmail, code, OtpToken.TYPE_EMAIL_CHANGE, expiresAt);
+        otpRepo.create(token);
+
+        emailService.sendEmailChangeOtp(normalizedEmail, fullName, code);
+        return code;
+    }
+
+    @Override
     public boolean verifyActivationOtp(String email, String otpCode) {
         return verify(email, OtpToken.TYPE_ACTIVATION, otpCode);
     }
@@ -67,6 +84,11 @@ public class OtpServiceImpl implements OtpService {
     @Override
     public boolean verifyForgotPasswordOtp(String email, String otpCode) {
         return verify(email, OtpToken.TYPE_FORGOT_PASSWORD, otpCode);
+    }
+
+    @Override
+    public boolean verifyEmailChangeOtp(String newEmail, String otpCode) {
+        return verify(newEmail, OtpToken.TYPE_EMAIL_CHANGE, otpCode);
     }
 
     @Override
@@ -79,6 +101,9 @@ public class OtpServiceImpl implements OtpService {
             return true;
         } else if (OtpToken.TYPE_FORGOT_PASSWORD.equalsIgnoreCase(otpType)) {
             generateAndSendForgotPasswordOtp(email, fullName);
+            return true;
+        } else if (OtpToken.TYPE_EMAIL_CHANGE.equalsIgnoreCase(otpType)) {
+            generateAndSendEmailChangeOtp(email, fullName);
             return true;
         }
         return false;

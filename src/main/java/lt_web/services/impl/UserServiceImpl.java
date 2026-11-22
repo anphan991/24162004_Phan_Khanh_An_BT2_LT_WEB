@@ -129,6 +129,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User updateProfile(int userId, String fullName, String phone, String avatar) {
+        if (userId <= 0) {
+            return null;
+        }
+        String cleanFullName = fullName == null ? null : fullName.trim();
+        String cleanPhone = phone == null || phone.isBlank() ? null : phone.trim();
+        String cleanAvatar = avatar == null || avatar.isBlank() ? null : avatar.trim();
+        return userRepo.updateProfile(userId, cleanFullName, cleanPhone, cleanAvatar);
+    }
+
+    @Override
+    public User updateEmail(int userId, String newEmail) {
+        if (userId <= 0 || newEmail == null || newEmail.isBlank()) {
+            return null;
+        }
+        return userRepo.updateEmail(userId, newEmail.trim().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    @Override
     public void delete(int id) {
         userRepo.delete(id);
     }

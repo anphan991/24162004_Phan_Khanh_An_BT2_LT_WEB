@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Quản trị - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=20261119-v3">
 </head>
 <body class="admin-page">
 <div class="admin-shell">
@@ -94,7 +94,7 @@
                                     <c:url value="/image" var="imgUrl">
                                         <c:param name="fname" value="${cate.icon}" />
                                     </c:url>
-                                    <td><div class="admin-thumb"><img src="${imgUrl}" alt="<c:out value='${cate.catename}' />"></div></td>
+                                    <td><div class="admin-thumb"><img src="${cate.externalIcon ? cate.icon : imgUrl}" alt="<c:out value='${cate.catename}' />"></div></td>
                                     <td><strong><c:out value="${cate.catename}" /></strong></td>
                                     <td class="admin-id">#<c:out value="${cate.id}" /></td>
                                     <td>

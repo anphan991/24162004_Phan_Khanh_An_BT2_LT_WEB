@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><c:out value="${video.title}" /> - ShopMVC Video</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261116-v2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v3">
     <style>
         .video-detail-layout {
             display: grid;
@@ -160,6 +160,7 @@
             <c:url value="/image" var="posterUrl">
                 <c:param name="fname" value="${not empty video.poster ? video.poster : 'default-video-poster.svg'}" />
             </c:url>
+            <c:set var="resolvedPosterUrl" value="${video.externalPoster ? video.poster : posterUrl}" />
 
             <div class="video-player-wrap">
                 <c:choose>
@@ -182,7 +183,7 @@
                                controls
                                autoplay
                                preload="metadata"
-                               poster="${posterUrl}"
+                               poster="${resolvedPosterUrl}"
                                data-sample="${video.sampleVideo}"
                                data-title="<c:out value='${video.title}' />">
                             <c:if test="${!video.sampleVideo}">
@@ -235,16 +236,16 @@
                                     <c:url value="/image" var="relPosterUrl">
                                         <c:param name="fname" value="${rv.poster}" />
                                     </c:url>
-                                    <img src="${relPosterUrl}" alt="<c:out value='${rv.title}' />">
+                                    <img src="${rv.externalPoster ? rv.poster : relPosterUrl}" alt="<c:out value='${rv.title}' />">
                                 </c:when>
                                 <c:when test="${rv.youtubeVideo}">
                                     <img src="${rv.youtubeThumbnailUrl}" alt="<c:out value='${rv.title}' />">
                                 </c:when>
-                                <c:when test="${!rv.sampleVideo && !rv.externalVideo}">
+                                <c:when test="${!rv.sampleVideo}">
                                     <c:url value="/video-file" var="relThumbVideoUrl">
                                         <c:param name="fname" value="${rv.videoPath}" />
                                     </c:url>
-                                    <video src="${relThumbVideoUrl}#t=0.5" preload="metadata" muted playsinline></video>
+                                    <video src="${rv.externalVideo ? rv.videoPath : relThumbVideoUrl}#t=0.5" preload="metadata" muted playsinline></video>
                                 </c:when>
                                 <c:otherwise>
                                     <c:url value="/image" var="relPosterUrl">

@@ -24,3 +24,14 @@ mail.smtp.auth=true
 mail.smtp.starttls.enable=true
 mail.from.name=ShopMVC
 
+# Cấu hình Cloudinary để upload ảnh đại diện (Profile) qua multipart/form-data.
+# Có thể cấu hình tại db.properties / cloudinary.properties hoặc biến môi trường CLOUDINARY_*:
+# - Chế độ Signed upload: cần cloudinary.cloud_name, cloudinary.api_key, cloudinary.api_secret (hoặc cloudinary.url)
+# - Hoặc chế độ Unsigned upload: cần cloudinary.cloud_name + cloudinary.upload_preset
+cloudinary.cloud_name=
+cloudinary.api_key=
+cloudinary.api_secret=
+cloudinary.upload_preset=
+cloudinary.folder=shopmvc/avatars
+
+

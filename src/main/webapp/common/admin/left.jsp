@@ -4,24 +4,63 @@
 <aside class="admin-sidebar">
     <a class="admin-brand" href="${pageContext.request.contextPath}/admin/category/list"><span>ShopMVC Admin</span></a>
 
-    <div class="admin-profile">
-        <div class="admin-profile-name"><c:out value="${not empty sessionScope.account ? sessionScope.account.fullName : 'Admin'}" /></div>
-        <div class="admin-profile-role">
+    <div class="admin-profile d-flex align-items-center gap-3">
+        <span class="sitemesh-avatar" style="width: 38px; height: 38px; flex: 0 0 38px;">
             <c:choose>
-                <c:when test="${sessionScope.account.roleid == 1}">Quản trị viên</c:when>
-                <c:otherwise>Quản lý</c:otherwise>
+                <c:when test="${not empty sessionScope.account.avatar}">
+                    <c:choose>
+                        <c:when test="${sessionScope.account.avatar.startsWith('http://') || sessionScope.account.avatar.startsWith('https://')}">
+                            <img src="<c:out value='${sessionScope.account.avatar}' />" alt="Avatar">
+                        </c:when>
+                        <c:otherwise>
+                            <c:url value="/image" var="sideAvatarUrl">
+                                <c:param name="fname" value="${sessionScope.account.avatar}" />
+                            </c:url>
+                            <img src="${sideAvatarUrl}" alt="Avatar">
+                        </c:otherwise>
+                    </c:choose>
+                </c:when>
+                <c:otherwise>
+                    <c:out value="${not empty sessionScope.account ? sessionScope.account.userName.substring(0, 1) : 'A'}" />
+                </c:otherwise>
             </c:choose>
+        </span>
+        <div class="min-w-0">
+            <div class="admin-profile-name"><c:out value="${not empty sessionScope.account ? sessionScope.account.fullName : 'Admin'}" /></div>
+            <div class="admin-profile-role">
+                <c:choose>
+                    <c:when test="${sessionScope.account.roleid == 1}">Quản trị viên</c:when>
+                    <c:otherwise>Quản lý</c:otherwise>
+                </c:choose>
+            </div>
         </div>
     </div>
 
     <div class="admin-nav-label">Quản lý</div>
-    <a class="admin-link ${pageContext.request.servletPath == '/admin/category/list' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/category/list">Danh mục sản phẩm</a>
-    <a class="admin-link ${pageContext.request.servletPath == '/admin/category/add' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/category/add">Thêm danh mục</a>
-    <a class="admin-link ${pageContext.request.servletPath == '/admin/video/list' || pageContext.request.servletPath == '/video' ? 'active' : ''}" href="${pageContext.request.contextPath}/video">Quản lý Video</a>
-    <a class="admin-link ${pageContext.request.servletPath == '/admin/video/add' || pageContext.request.servletPath == '/video/add' ? 'active' : ''}" href="${pageContext.request.contextPath}/video/add">Thêm Video</a>
-    <a class="admin-link" href="${pageContext.request.contextPath}/admin/category/list#users-section">Tài khoản</a>
+    <a class="admin-link ${pageContext.request.servletPath == '/admin/category/list' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/category/list">
+        <i class="bi bi-grid-1x2 me-2"></i>Danh mục sản phẩm
+    </a>
+    <a class="admin-link ${pageContext.request.servletPath == '/admin/category/add' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/category/add">
+        <i class="bi bi-plus-square me-2"></i>Thêm danh mục
+    </a>
+    <a class="admin-link ${pageContext.request.servletPath == '/admin/video/list' || pageContext.request.servletPath == '/video' ? 'active' : ''}" href="${pageContext.request.contextPath}/video">
+        <i class="bi bi-collection-play me-2"></i>Quản lý Video
+    </a>
+    <a class="admin-link ${pageContext.request.servletPath == '/admin/video/add' || pageContext.request.servletPath == '/video/add' ? 'active' : ''}" href="${pageContext.request.contextPath}/video/add">
+        <i class="bi bi-camera-video me-2"></i>Thêm Video
+    </a>
+    <a class="admin-link" href="${pageContext.request.contextPath}/admin/category/list#users-section">
+        <i class="bi bi-people me-2"></i>Tài khoản
+    </a>
 
-    <div class="admin-nav-label admin-nav-spacer">Truy cập nhanh</div>
-    <a class="admin-link" href="${pageContext.request.contextPath}/home">Danh mục</a>
-    <a class="admin-link" href="${pageContext.request.contextPath}/">Trang chủ</a>
+    <div class="admin-nav-label admin-nav-spacer">Tài khoản &amp; Nhanh</div>
+    <a class="admin-link" href="${pageContext.request.contextPath}/profile">
+        <i class="bi bi-person-badge me-2"></i>Hồ sơ cá nhân
+    </a>
+    <a class="admin-link" href="${pageContext.request.contextPath}/home">
+        <i class="bi bi-box-seam me-2"></i>Danh mục
+    </a>
+    <a class="admin-link" href="${pageContext.request.contextPath}/">
+        <i class="bi bi-house-door me-2"></i>Trang chủ
+    </a>
 </aside>

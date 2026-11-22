@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 public class Constant {
     public static final String SESSION_USERNAME = "username";
     public static final String SESSION_ACCOUNT = "account";
+    public static final String SESSION_PENDING_PROFILE_EMAIL = "profilePendingEmail";
     public static final String COOKIE_REMEMBER = "remember_token";
     public static final String LEGACY_COOKIE_REMEMBER = "username";
 
@@ -38,6 +39,7 @@ public class Constant {
         public static final String FORGOT_PASSWORD = "/views/forgot-password.jsp";
         public static final String RESET_PASSWORD = "/views/reset-password.jsp";
         public static final String HOME = "/views/home.jsp";
+        public static final String PROFILE = "/views/profile.jsp";
         public static final String VIDEO_LIST = "/views/video-list.jsp";
         public static final String VIDEO_DETAIL = "/views/video-detail.jsp";
         public static final String VIDEO_FORM = "/views/video-form.jsp";

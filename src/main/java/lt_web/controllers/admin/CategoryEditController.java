@@ -15,6 +15,7 @@ import lt_web.entity.Category;
 import lt_web.exceptions.DataAccessException;
 import lt_web.services.CategoryService;
 import lt_web.services.impl.CategoryServiceImpl;
+import lt_web.utils.CloudinaryService;
 import lt_web.utils.Constant;
 import lt_web.utils.FileStorage;
 import lt_web.utils.ValidationUtil;
@@ -28,6 +29,7 @@ import lt_web.utils.ValidationUtil;
 )
 public class CategoryEditController extends HttpServlet {
     private final CategoryService cateService = new CategoryServiceImpl();
+    private final CloudinaryService cloudinaryService = new CloudinaryService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -107,7 +109,7 @@ public class CategoryEditController extends HttpServlet {
                 showFormError(req, resp, draft, errors.get("icon"));
                 return;
             }
-            storedName = FileStorage.saveImage(part);
+            storedName = cloudinaryService.saveImageWithCloudFallback(part, "shopmvc/categories", 255);
             category.setIcon(storedName == null ? fileold : storedName);
         } catch (IllegalStateException e) {
             log("Ảnh danh mục vượt dung lượng cho phép", e);
@@ -117,9 +119,12 @@ public class CategoryEditController extends HttpServlet {
             return;
         } catch (Exception e) {
             log("Không thể lưu ảnh danh mục", e);
-            errors.put("icon", "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.");
+            String msg = (e.getMessage() != null && !e.getMessage().isBlank())
+                    ? e.getMessage()
+                    : "Không thể lưu ảnh. Vui lòng chọn JPG, PNG, SVG, GIF hoặc WEBP hợp lệ.";
+            errors.put("icon", msg);
             req.setAttribute("errors", errors);
-            showFormError(req, resp, draft, errors.get("icon"));
+            showFormError(req, resp, draft, msg);
             return;
         }
 

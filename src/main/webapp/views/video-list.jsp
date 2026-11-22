@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Danh sách Video - ShopMVC</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261116-v2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/site.css?v=20261119-v3">
     <style>
         .video-toolbar {
             display: flex;
@@ -341,16 +341,16 @@
                                     <c:url value="/image" var="posterUrl">
                                         <c:param name="fname" value="${v.poster}" />
                                     </c:url>
-                                    <img src="${posterUrl}" alt="<c:out value='${v.title}' />">
+                                    <img src="${v.externalPoster ? v.poster : posterUrl}" alt="<c:out value='${v.title}' />">
                                 </c:when>
                                 <c:when test="${v.youtubeVideo}">
                                     <img src="${v.youtubeThumbnailUrl}" alt="<c:out value='${v.title}' />">
                                 </c:when>
-                                <c:when test="${!v.sampleVideo && !v.externalVideo}">
+                                <c:when test="${!v.sampleVideo}">
                                     <c:url value="/video-file" var="thumbVideoUrl">
                                         <c:param name="fname" value="${v.videoPath}" />
                                     </c:url>
-                                    <video src="${thumbVideoUrl}#t=0.5" preload="metadata" muted playsinline></video>
+                                    <video src="${v.externalVideo ? v.videoPath : thumbVideoUrl}#t=0.5" preload="metadata" muted playsinline></video>
                                 </c:when>
                                 <c:otherwise>
                                     <c:url value="/image" var="posterUrl">

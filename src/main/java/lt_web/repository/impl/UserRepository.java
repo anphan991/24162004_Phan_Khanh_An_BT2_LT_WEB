@@ -125,6 +125,58 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public User updateProfile(int userId, String fullName, String phone, String avatar) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            User existing = enma.find(User.class, userId);
+            if (existing == null) {
+                trans.rollback();
+                return null;
+            }
+            existing.setFullName(fullName);
+            existing.setPhone(phone);
+            if (avatar != null && !avatar.isBlank()) {
+                existing.setAvatar(avatar.trim());
+            }
+            trans.commit();
+            return existing;
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new DataAccessException("Không thể cập nhật hồ sơ cá nhân.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
+    public User updateEmail(int userId, String newEmail) {
+        EntityManager enma = JpaConfig.getEntityManager();
+        EntityTransaction trans = enma.getTransaction();
+        try {
+            trans.begin();
+            User existing = enma.find(User.class, userId);
+            if (existing == null) {
+                trans.rollback();
+                return null;
+            }
+            existing.setEmail(newEmail);
+            trans.commit();
+            return existing;
+        } catch (Exception e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new DataAccessException("Không thể cập nhật email mới.", e);
+        } finally {
+            enma.close();
+        }
+    }
+
+    @Override
     public void updatePassword(String username, String passwordHash) {
         EntityManager enma = JpaConfig.getEntityManager();
         EntityTransaction trans = enma.getTransaction();

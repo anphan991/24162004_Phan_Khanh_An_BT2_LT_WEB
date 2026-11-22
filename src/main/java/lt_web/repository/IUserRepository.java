@@ -13,6 +13,8 @@ public interface IUserRepository {
     User getById(int id);
     void insert(User user);
     void update(User user);
+    User updateProfile(int userId, String fullName, String phone, String avatar);
+    User updateEmail(int userId, String newEmail);
     void updateStatus(int userId, int status);
     void updatePassword(String username, String passwordHash);
     void updatePasswordByEmail(String email, String passwordHash);

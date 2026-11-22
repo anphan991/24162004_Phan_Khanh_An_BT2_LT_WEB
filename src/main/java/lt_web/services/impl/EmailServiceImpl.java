@@ -66,6 +66,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public boolean sendEmailChangeOtp(String toEmail, String fullName, String otpCode) {
+        String greeting = (fullName != null && !fullName.isBlank()) ? fullName : "Quý khách";
+        String subject = "[ShopMVC] Mã OTP xác nhận đổi email mới";
+        String title = "Xác nhận email mới ShopMVC";
+        String instruction = "Xin chào <strong>" + escape(greeting) + "</strong>,<br>"
+                + "Bạn vừa yêu cầu cập nhật sang địa chỉ email này tại ShopMVC. Vui lòng nhập mã OTP dưới đây để hoàn tất thay đổi email:";
+        return sendOtp(toEmail, subject, title, otpCode, instruction);
+    }
+
+    @Override
     public boolean sendOtp(String toEmail, String subject, String title, String otpCode, String instruction) {
         if (toEmail == null || toEmail.isBlank() || otpCode == null) {
             return false;
